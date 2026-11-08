@@ -96,6 +96,7 @@ internal sealed class ConsoleFile(DosKernel kernel) : OpenFile
 internal sealed class DiskFile(IDriveFile file, DosKernel kernel, char drive) : OpenFile
 {
     private long _position;
+    private bool _written;
 
     public override bool IsDevice => false;
     public override long Length => file.Length;
@@ -113,7 +114,9 @@ internal sealed class DiskFile(IDriveFile file, DosKernel kernel, char drive) : 
         if (data.Length == 0)
         {
             // DOS 的惯例：写 0 字节表示把文件截断到当前位置
-            kernel.DriveWrite(drive, () => file.SetLength(_position));
+            long at = _position;
+            kernel.DriveWrite(drive, () => file.SetLength(at));
+            _written = true;
             return 0;
         }
         // Span 不能被 lambda 捕获（它只能活在栈上），所以先复制成数组。
@@ -121,6 +124,7 @@ internal sealed class DiskFile(IDriveFile file, DosKernel kernel, char drive) : 
         long position = _position;
         kernel.DriveWrite(drive, () => file.Write(position, copy));
         _position += data.Length;
+        _written = true;
         return data.Length;
     }
 
@@ -138,5 +142,9 @@ internal sealed class DiskFile(IDriveFile file, DosKernel kernel, char drive) : 
         return _position;
     }
 
-    public override void Close() => kernel.DriveWrite(drive, file.Close);
+    public override void Close()
+    {
+        if (_written) kernel.DriveWrite(drive, () => file.Close(kernel.Now));
+        else file.Close(null);
+    }
 }

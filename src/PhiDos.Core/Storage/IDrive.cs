@@ -23,8 +23,11 @@ public interface IDriveFile
     int Read(long position, Span<byte> buffer);
     void Write(long position, ReadOnlySpan<byte> data);
     void SetLength(long length);
-    /// <summary>把修改写回磁盘并更新目录项（大小、修改时间）。</summary>
-    void Close();
+    /// <summary>
+    /// 把修改写回磁盘并更新目录项。<paramref name="modifiedTime"/> 不为 null 时
+    /// 表示文件被写过，目录项的修改时间改成这个值。
+    /// </summary>
+    void Close(DateTime? modifiedTime);
 }
 
 /// <summary>
