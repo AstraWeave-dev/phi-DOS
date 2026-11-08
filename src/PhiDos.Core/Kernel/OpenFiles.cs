@@ -102,6 +102,9 @@ internal sealed class DiskFile(IDriveFile file, DosKernel kernel, char drive) : 
     public override long Length => file.Length;
     public char Drive => drive;
 
+    /// <summary>不为 null 时，关闭文件时把修改时间设成这个值（COPY 保留源文件的时间）。</summary>
+    public DateTime? KeepTimestamp { get; set; }
+
     public override int Read(Span<byte> buffer)
     {
         int n = file.Read(_position, buffer);
@@ -144,7 +147,7 @@ internal sealed class DiskFile(IDriveFile file, DosKernel kernel, char drive) : 
 
     public override void Close()
     {
-        if (_written) kernel.DriveWrite(drive, () => file.Close(kernel.Now));
+        if (_written) kernel.DriveWrite(drive, () => file.Close(KeepTimestamp ?? kernel.Now));
         else file.Close(null);
     }
 }
