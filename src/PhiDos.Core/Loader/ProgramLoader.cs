@@ -41,6 +41,10 @@ internal sealed class ProgramLoader(DosKernel kernel)
             {
                 throw new DosException(DosError.BadProgram, "not a .NET assembly");
             }
+            catch (Exception ex) when (ex is not DosException)
+            {
+                throw new DosException(DosError.BadProgram, "cannot load: " + ex.Message);
+            }
 
             Type type = FindEntryType(assembly);
             IPhiProgram program;

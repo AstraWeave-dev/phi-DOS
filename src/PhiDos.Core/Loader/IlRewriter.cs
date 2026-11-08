@@ -61,26 +61,35 @@ internal static class IlRewriter
 
     public static byte[] Process(byte[] image, bool verify, bool inject)
     {
-        using var input = new MemoryStream(image);
-        AssemblyDefinition assembly;
         try
         {
-            assembly = AssemblyDefinition.ReadAssembly(input, new ReaderParameters { ReadingMode = ReadingMode.Immediate });
+            return ProcessCore(image, verify, inject);
         }
-        catch (Exception ex) when (ex is BadImageFormatException or InvalidOperationException or ArgumentException or EndOfStreamException)
+        catch (DosException)
         {
-            throw new DosException(DosError.BadProgram, "not a .NET assembly");
+            throw;
         }
+        catch (Exception ex)
+        {
+            // 不管程序文件坏成什么样，都只是"这个程序不能运行"，不能让整台机器出错
+            throw new DosException(DosError.BadProgram, ex is BadImageFormatException or EndOfStreamException
+                ? "not a .NET assembly"
+                : "cannot load: " + ex.Message);
+        }
+    }
 
-        using (assembly)
-        {
-            var module = assembly.MainModule;
-            if (verify) Verify(module);
-            if (inject) Inject(module);
-            using var output = new MemoryStream();
-            assembly.Write(output);
-            return output.ToArray();
-        }
+    private static byte[] ProcessCore(byte[] image, bool verify, bool inject)
+    {
+        using var input = new MemoryStream(image);
+        // Deferred：用到时才解码。Immediate 会立刻解码所有特性，解码时要去磁盘上找框架程序集，
+        // 发布成单个可执行文件时找不到。
+        using var assembly = AssemblyDefinition.ReadAssembly(input, new ReaderParameters { ReadingMode = ReadingMode.Deferred });
+        var module = assembly.MainModule;
+        if (verify) Verify(module);
+        if (inject) Inject(module);
+        using var output = new MemoryStream();
+        assembly.Write(output);
+        return output.ToArray();
     }
 
     private static void Verify(ModuleDefinition module)
@@ -121,8 +130,7 @@ internal static class IlRewriter
 
     private static void Inject(ModuleDefinition module)
     {
-        // ImportReference 把 DosRuntime.Poll 变成这个程序集可以引用的方法
-        var poll = module.ImportReference(typeof(DosRuntime).GetMethod(nameof(DosRuntime.Poll))!);
+        var poll = PollReference(module);
 
         foreach (var type in AllTypes(module))
         {
@@ -132,6 +140,24 @@ internal static class IlRewriter
                 InjectInto(method.Body, poll);
             }
         }
+    }
+
+    /// <summary>
+    /// 手工构造对 PhiDos.Abi.DosRuntime.Poll() 的引用。
+    /// 不用 module.ImportReference(反射得到的 MethodInfo)：那样 Cecil 会去磁盘上找 System.Runtime.dll，
+    /// 发布成单个可执行文件时这些文件并不存在。
+    /// </summary>
+    private static MethodReference PollReference(ModuleDefinition module)
+    {
+        var abiName = typeof(DosRuntime).Assembly.GetName();
+        var scope = module.AssemblyReferences.FirstOrDefault(r => r.Name == abiName.Name);
+        if (scope is null)
+        {
+            scope = new AssemblyNameReference(abiName.Name!, abiName.Version);
+            module.AssemblyReferences.Add(scope);
+        }
+        var type = new TypeReference(typeof(DosRuntime).Namespace, nameof(DosRuntime), module, scope);
+        return new MethodReference(nameof(DosRuntime.Poll), module.TypeSystem.Void, type) { HasThis = false };
     }
 
     private static void InjectInto(MethodBody body, MethodReference poll)

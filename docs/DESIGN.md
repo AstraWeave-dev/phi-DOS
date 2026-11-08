@@ -168,7 +168,13 @@ public interface IPhiProgram
   - Ctrl+C：Poll 只在 BREAK ON 时响应。BREAK OFF 时纯计算的死循环不理 Ctrl+C，只能重启，这和原版一致。
   - 无限递归：Poll 会检查剩余栈空间，栈快用完时抛出可以捕获的异常，不会让整个游戏因栈溢出崩溃。
 - 被放弃的线程：.NET 10 不支持强制终止线程。重启时旧线程会收到 MachineHaltException；如果程序把异常吞掉继续运行，超过 16 次后线程会在 Poll 里永久睡眠，不再占用 CPU。
-- 提示符：默认 "A>"，支持 PROMPT。
+- 提示符：默认 "A>"，支持 PROMPT 及 $T $D $P $V $N $G $L $B $Q $H $E $_ $$ 元字符。
+- 重定向：< > >>。照原版，> 前面的空格会留在命令里（ECHO hi > X 写入 "hi "）。双引号里的 < > | 不当作重定向，方便 FIND "a|b"（这一点比原版宽松）。
+- 管道：照 2.0，前一个命令的输出写进当前驱动器根目录的临时文件 %PIPE1.$$$、%PIPE2.$$$，后一个命令从中读取，用完删除。所以 DIR | SORT 的结果里会看到这个临时文件，和原版一样。
+- 批处理：%0 到 %9、%%、%名字%（环境变量）、ECHO、GOTO（标号只比较前 8 个字符）、IF [NOT] ERRORLEVEL / EXIST / ==、FOR %%v IN (...) DO（不能嵌套）、SHIFT、PAUSE、REM。
+  批处理里运行另一个批处理是"转过去"不再回来（2.0 没有 CALL）。每执行一行都重新打开批处理文件，运行中被删除会显示 "Batch file missing"。
+  Ctrl+C 时询问 "Terminate batch job (Y/N)?"。批处理结束后 ECHO 恢复为开始前的状态。
+- 开机：A 盘根目录有 AUTOEXEC.BAT 时运行它，没有时询问日期和时间（MachineOptions.PromptForDateTimeAtBoot 可关闭）。
 
 ## 独立应用（终端版）
 ~~~
@@ -177,7 +183,11 @@ phidos -a game.phidisk -b ./dev        A 盘挂虚拟磁盘，B 盘挂文件夹
 phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 ~~~
 - 参数是文件则按虚拟磁盘挂载，是文件夹则按文件夹挂载。
-- 提供发布为单个可执行文件的方式，无需另装 .NET 即可运行。
+- 发布为单个可执行文件，无需另装 .NET 即可运行：
+  `dotnet publish src/PhiDos.ConsoleHost -p:PublishProfile=win-x64`，结果在 publish/win-x64/phidos.exe。
+  另有 linux-x64、osx-arm64 两个配置。不能开启裁剪（PublishTrimmed），磁盘上的程序可能用到 .NET 库里的任何东西。
+- 终端里按 F12 重启虚拟机，在最外层输入 EXIT 退出。标准输入可以重定向为脚本文件，读完后自动关机。
+- 设置环境变量 PHIDOS_TRACE=1 时，内部错误会显示完整调用栈。
 - Godot 宿主完成后，同样可导出为独立应用。
 
 ## 里程碑
@@ -187,7 +197,7 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 - M3 ✅：写操作 COPY、ERASE/DEL、RENAME/REN、MD、RD，两种驱动器均支持；新建空白 .phidisk。
 - M4 ✅：程序查找（当前目录 → PATH）与内置程序表。
 - M5 ✅：IL 程序加载器（可回收加载、取消检查注入），第一个 .COM 程序在磁盘上跑通。
-- M6：重定向、管道、批处理（IF/GOTO/FOR/SHIFT/ECHO）。
+- M6 ✅：重定向、管道、批处理（IF/GOTO/FOR/SHIFT/ECHO）。
 - M7：Godot 宿主接入文档（详细版和速查版各一份），由使用者按文档接入 ProjectVN。
 
 里程碑完成后在标题前标 ✅，对应的提交标题以 "M0："、"M1：" 这样的前缀开头。（远端仓库不接受推送 Git 标签，所以不打标签。）

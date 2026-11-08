@@ -92,7 +92,7 @@ internal sealed partial class CommandShell
 
         if (hasAutoexec)
         {
-            StartBatch("A:\\AUTOEXEC.BAT", []);
+            StartBatch("A:\\AUTOEXEC.BAT", "AUTOEXEC", []);
         }
         else if (_kernel.Machine.Options.PromptForDateTimeAtBoot)
         {

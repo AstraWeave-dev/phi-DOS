@@ -66,6 +66,15 @@ public class LoaderTests
     }
 
     [Fact]
+    public void CorruptAssembly_DoesNotBreakTheMachine()
+    {
+        byte[] good = ProgramCompiler.Compile(Hello);
+        using var m = Boot(("BROKEN.COM", good[..(good.Length / 2)]));
+        Assert.StartsWith("Error in EXE file\n", m.Run("BROKEN"));
+        Assert.Equal("\nphi-DOS Version X.XX\n\nA>", m.Run("VER"));
+    }
+
+    [Fact]
     public void ForbiddenApi_IsRejected()
     {
         const string evil = """

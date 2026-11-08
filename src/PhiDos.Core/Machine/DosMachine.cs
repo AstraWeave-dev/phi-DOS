@@ -203,6 +203,9 @@ public sealed partial class DosMachine : IDisposable
         {
             // 内核自身的 bug，不应发生。显示出来方便排查，然后关机。
             _console.Write($"\r\nphi-DOS internal error: {ex.GetType().Name}: {ex.Message}\r\n");
+            // 设置环境变量 PHIDOS_TRACE=1 时显示完整的调用栈，方便排查
+            if (System.Environment.GetEnvironmentVariable("PHIDOS_TRACE") == "1")
+                _console.Write(ex.ToString().Replace("\n", "\r\n") + "\r\n");
         }
         finally
         {

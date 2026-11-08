@@ -20,7 +20,7 @@ internal sealed partial class CommandShell
 
         if (path.Value.Leaf!.EndsWith(".BAT", StringComparison.Ordinal))
         {
-            StartBatch(path.Value.ToString(), cmd.RawArgs);
+            StartBatch(path.Value.ToString(), cmd.Name, cmd.RawArgs);
             return;
         }
 
