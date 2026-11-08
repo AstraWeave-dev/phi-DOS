@@ -36,11 +36,12 @@ phi-DOS 是一个用 C# 实现的、行为仿照 MS-DOS 2.0 的磁盘操作系�
 
 ## 解决方案结构
 - PhiDos.Abi：极小的类库，只包含 IDos、IPhiProgram 等接口和公共类型。程序只引用它。
-- PhiDos.Core：机器、内核与外壳，纯 C#，不依赖 Godot。
-- PhiDos.Programs：外部命令实现（FORMAT、CHKDSK、EDLIN 等），编译后放入磁盘。
+- PhiDos.Core：机器、内核与外壳，纯 C#，不依赖 Godot。依赖 Mono.Cecil（程序加载时改写 IL）。
+- PhiDos.Programs：外部命令，每个命令一个小项目（Format、More、Sort、Find），编译出的 DLL 就是磁盘上的 FORMAT.COM、MORE.COM、SORT.EXE、FIND.EXE。
+- PhiDos.SystemDisk：把上面这些命令作为资源打包，提供"新建系统盘"的功能。宿主引用它。
 - PhiDos.ConsoleHost：终端版宿主，即开发期的独立应用（可执行文件名 phidos）。
-- PhiDos.Tests：单元测试（xUnit）。
-- Godot 宿主最后接入。Core 层不得引用 Godot。
+- PhiDos.Tests：单元测试（xUnit），用 Roslyn 现场编译测试程序。
+- Godot 宿主由使用者按 docs 里的接入文档自行接入。Core 层不得引用 Godot。
 
 ## 虚拟机（DosMachine）
 所有宿主都通过 DosMachine 拉起 DOS：
@@ -108,6 +109,8 @@ public interface IDos
     int Write(int handle, ReadOnlySpan<byte> data);   // 写 0 字节表示截断到当前位置
     long Seek(int handle, long offset, SeekOrigin origin);
     void Close(int handle);
+    int Duplicate(int handle);                         // INT 21h 45h
+    void ForceDuplicate(int source, int target);       // INT 21h 46h
     void Delete(string path);
     void Rename(string from, string to);
     IReadOnlyList<DirEntry> FindFiles(string pattern);                         // 只含普通文件
@@ -125,6 +128,7 @@ public interface IDos
 
     // 进程与环境
     int Exec(string program, string args);
+    string CommandTail { get; }         // 命令行参数原文
     string? GetEnv(string name);
     DateTime Now { get; }
 }
@@ -135,18 +139,35 @@ public interface IPhiProgram
 }
 ~~~
 
-相比最初草案新增的成员：KeyAvailable、FindFiles 的带属性重载、GetDiskInfo、FormatDisk（FORMAT 和 DIR 需要）。
+相比最初草案新增的成员：
+
+| 成员 | 对应的 DOS 功能 | 为什么需要 |
+|---|---|---|
+| KeyAvailable | INT 21h 0Bh | 游戏类程序要不等待地检查按键 |
+| FindFiles(pattern, include) | INT 21h 4Eh 的属性参数 | DIR 要列出子目录 |
+| GetDiskInfo | INT 21h 36h | DIR 的剩余空间、FORMAT 的容量报告 |
+| FormatDisk | 无（原版 FORMAT 直接操作磁盘） | FORMAT 命令 |
+| Duplicate / ForceDuplicate | INT 21h 45h / 46h | MORE 从管道读数据、从键盘读按键 |
+| CommandTail | PSP 80h 处的命令尾 | FIND 要解析带空格的 "字符串" |
 
 句柄 0、1、2 分别是标准输入、标准输出、标准错误，3、4 是 AUX 和 PRN（都接到 NUL）。每个进程最多 20 个句柄，子程序继承父程序的全部句柄。
 
 ## 关键约定
-- 程序格式：.COM 文件是一个 .NET 程序集，内含一个实现 IPhiProgram 的公开类。加载器找到该类型并调用 Run。
-- 程序加载：使用可回收的 AssemblyLoadContext 加载，程序结束后卸载，避免反复运行导致内存增长。
+- 程序格式：.COM 和 .EXE 文件都是一个 .NET 程序集，内含唯一一个实现 IPhiProgram 的公开类。加载器找到该类型并调用 Run。两种扩展名在 phi-DOS 里没有区别，只影响查找顺序。
+- 程序加载：使用可回收的 AssemblyLoadContext 加载，程序结束后卸载，避免反复运行导致内存增长。程序文件最大 640KB。PhiDos.Abi 始终使用系统自己加载的那一份。
+- 加载失败（不是 .NET 程序集、找不到入口类、调用了禁止的 API）时显示 "Error in EXE file"，下一行缩进显示具体原因。
+- 程序未处理的异常：显示 "Abnormal program termination" 和异常信息，退出码 255。
+- API 检查：加载时拒绝直接使用以下 API 的程序（只是基本防护，不是安全沙箱，反射之类的手段仍可绕过）：
+  直接访问电脑文件（File、Directory、FileStream、StreamReader/Writer 等）、Process、Environment.Exit 等危险成员、Console、Assembly、Activator、Marshal、NativeLibrary、P/Invoke、Thread、ThreadPool、Timer、Task、Parallel，以及 System.Net、System.Reflection.Emit、System.Runtime.Loader 等命名空间。
 - 程序查找顺序（照 2.0）：内置命令 → 当前目录 → PATH 中的各目录；每个目录内依次找 .COM → .EXE → .BAT。都找不到输出 "Bad command or file name"。
 - 内置程序表：部分外部命令可先用 Dictionary<string, Func<IPhiProgram>> 直接映射到 C# 实现，但磁盘上必须存在对应文件才能运行（删掉文件即不可用）。
 - 线程：每个程序在后台线程运行；输出写入线程安全队列，由宿主在主线程取出渲染。
-- 中断：IDos 每个方法开头检查取消请求，等价于 DOS 在系统调用时检查 Ctrl+C。
-- 死循环：.NET 10 不支持强制终止线程，被放弃的线程会一直占用 CPU。因此在 M5 实现加载器时，同时用 Mono.Cecil 在回跳指令处注入取消检查。宿主仍提供"重启"作为兜底。
+- 中断：IDos 每个方法开头检查 Ctrl+C。和 DOS 一样，BREAK OFF（默认）时只有控制台调用检查，BREAK ON 时所有调用都检查。
+- 注入检查点：加载时用 Mono.Cecil 在每个方法开头和每个回跳分支前插入 DosRuntime.Poll()。
+  - 重启：Poll 总是响应，所以死循环也能被重启打断。
+  - Ctrl+C：Poll 只在 BREAK ON 时响应。BREAK OFF 时纯计算的死循环不理 Ctrl+C，只能重启，这和原版一致。
+  - 无限递归：Poll 会检查剩余栈空间，栈快用完时抛出可以捕获的异常，不会让整个游戏因栈溢出崩溃。
+- 被放弃的线程：.NET 10 不支持强制终止线程。重启时旧线程会收到 MachineHaltException；如果程序把异常吞掉继续运行，超过 16 次后线程会在 Poll 里永久睡眠，不再占用 CPU。
 - 提示符：默认 "A>"，支持 PROMPT。
 
 ## 独立应用（终端版）
@@ -165,13 +186,14 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 - M2 ✅：外壳与只读命令 DIR、CD、TYPE、REM、PAUSE、DATE、TIME。
 - M3 ✅：写操作 COPY、ERASE/DEL、RENAME/REN、MD、RD，两种驱动器均支持；新建空白 .phidisk。
 - M4 ✅：程序查找（当前目录 → PATH）与内置程序表。
-- M5：IL 程序加载器（可回收加载、取消检查注入），第一个 .COM 程序在磁盘上跑通。
+- M5 ✅：IL 程序加载器（可回收加载、取消检查注入），第一个 .COM 程序在磁盘上跑通。
 - M6：重定向、管道、批处理（IF/GOTO/FOR/SHIFT/ECHO）。
 - M7：Godot 宿主接入文档（详细版和速查版各一份），由使用者按文档接入 ProjectVN。
 
 里程碑完成后在标题前标 ✅，对应的提交标题以 "M0："、"M1：" 这样的前缀开头。（远端仓库不接受推送 Git 标签，所以不打标签。）
 
-外部命令范围：FORMAT（只对虚拟磁盘生效）、MORE、SORT、FIND。CHKDSK 不提供，输入后报 "Bad command or file name"。
+外部命令范围：FORMAT（只对虚拟磁盘生效，支持 /V）、MORE、SORT（/R、/+n）、FIND（/V、/C、/N）。CHKDSK 不提供，输入后报 "Bad command or file name"。
+终端版在没有指定 A 盘时，自动给 A 盘一张内存中的临时系统盘（带上述命令）。
 
 ## 验证方法
 在 DOSBox 中从镜像启动原版 MS-DOS 2.0，执行一组操作；在 phi-DOS 中挂载内容相同的 .phidisk（可以是同一个镜像改名），执行同样操作，比对输出（列宽、日期格式、错误提示）。差异即 bug。

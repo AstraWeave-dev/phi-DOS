@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PhiDos.Core\PhiDos.Core.csproj" />
+    <ProjectReference Include="..\PhiDos.SystemDisk\PhiDos.SystemDisk.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -16,7 +16,8 @@ internal static class HostApp
                                                  Create a new .phidisk and exit
 
         A disk is either a .phidisk file (standard FAT12 image) or a folder.
-        With no disk at all, A: gets a temporary in-memory disk.
+        If nothing is mounted on A:, it gets a temporary in-memory system disk
+        (with FORMAT, MORE, SORT and FIND). Changes to it are lost on exit.
 
         Options:
           -r, --readonly        Mount the following disks write-protected
@@ -84,7 +85,7 @@ internal static class HostApp
         using var machine = new DosMachine(options);
         try
         {
-            if (mounts.Count == 0)
+            if (!mounts.Any(m => m.Drive == 'A'))
                 machine.MountImage('A', SystemDisk.CreateInMemory(), ownsStream: true);
             foreach (var (drive, path, ro) in mounts)
                 machine.Mount(drive, path, ro);

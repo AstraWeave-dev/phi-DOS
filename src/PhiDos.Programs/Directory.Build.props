@@ -1,0 +1,17 @@
+<!-- 所有外部命令共用的设置。每个命令一个项目，编译出的 DLL 就是磁盘上的 .COM / .EXE 文件。 -->
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!-- 不用隐式 using，程序只引用真正用到的命名空间 -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- 不生成调试符号文件，磁盘上只放 DLL 本身，体积更小 -->
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Private=false：不把 PhiDos.Abi.dll 复制到输出目录，系统运行时会提供它 -->
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\PhiDos.Abi\PhiDos.Abi.csproj" Private="false" />
+  </ItemGroup>
+</Project>

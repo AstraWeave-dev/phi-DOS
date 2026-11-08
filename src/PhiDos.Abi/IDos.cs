@@ -54,6 +54,18 @@ public interface IDos
     /// <summary>关闭句柄。</summary>
     void Close(int handle);
 
+    /// <summary>
+    /// 复制句柄（INT 21h 45h）：返回一个新句柄，和原句柄指向同一个打开的文件。
+    /// 新句柄总是编号最小的空闲句柄。
+    /// </summary>
+    int Duplicate(int handle);
+
+    /// <summary>
+    /// 强制复制句柄（INT 21h 46h）：让 <paramref name="target"/> 指向和 <paramref name="source"/>
+    /// 相同的文件。target 原来打开着的话先关闭。重定向就是靠它实现的。
+    /// </summary>
+    void ForceDuplicate(int source, int target);
+
     /// <summary>删除文件（不支持通配符）。</summary>
     void Delete(string path);
 
@@ -99,6 +111,12 @@ public interface IDos
     /// 不带扩展名时依次尝试 .COM 和 .EXE，并按 PATH 查找。
     /// </summary>
     int Exec(string program, string args);
+
+    /// <summary>
+    /// 命令行参数的原文（程序名之后的部分，相当于 PSP 80h 处的命令尾）。
+    /// 需要自己解析引号之类的程序用它，一般用 Run 的 args 就够了。
+    /// </summary>
+    string CommandTail { get; }
 
     /// <summary>读取环境变量，不存在时返回 null。名字不区分大小写。</summary>
     string? GetEnv(string name);

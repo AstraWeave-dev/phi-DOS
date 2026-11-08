@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    系统盘：把 PhiDos.Programs 里编译出来的外部命令作为资源打包进本程序集，
+    宿主（终端版、Godot 版）引用它，就能新建一张带有 FORMAT、MORE 等命令的磁盘。
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PhiProgramProject Include="..\PhiDos.Programs\Format\Format.csproj" />
+    <PhiProgramProject Include="..\PhiDos.Programs\More\More.csproj" />
+    <PhiProgramProject Include="..\PhiDos.Programs\Sort\Sort.csproj" />
+    <PhiProgramProject Include="..\PhiDos.Programs\Find\Find.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PhiDos.Core\PhiDos.Core.csproj" />
+    <!-- ReferenceOutputAssembly=false：只要求先编译这些项目，不把它们当作代码引用 -->
+    <ProjectReference Include="@(PhiProgramProject)" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!--
+    构建一开始就问出每个命令编译后的 DLL 路径，作为嵌入资源加进来，资源名形如 programs/FORMAT。
+    这时 DLL 可能还没生成，不要紧：上面的项目引用保证它们在编译本项目之前就会编译好。
+  -->
+  <Target Name="EmbedPhiPrograms" BeforeTargets="BeforeBuild">
+    <MSBuild Projects="@(PhiProgramProject)" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="PhiProgramDll" />
+    </MSBuild>
+    <ItemGroup>
+      <EmbeddedResource Include="@(PhiProgramDll)" LogicalName="programs/%(Filename)" />
+    </ItemGroup>
+    <Message Importance="high" Text="phi-DOS system programs: @(PhiProgramDll->'%(Filename)')" />
+  </Target>
+
+</Project>

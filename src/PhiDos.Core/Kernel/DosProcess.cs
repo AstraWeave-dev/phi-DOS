@@ -11,19 +11,21 @@ internal sealed class DosProcess : IDos
 {
     private readonly DosKernel _kernel;
 
-    public DosProcess(DosKernel kernel, DosProcess? parent, DosEnvironment environment, string name, string[] args)
+    public DosProcess(DosKernel kernel, DosProcess? parent, DosEnvironment environment, string name, string[] args, string tail = "")
     {
         _kernel = kernel;
         Parent = parent;
         Environment = environment;
         Name = name;
         Args = args;
+        Tail = tail;
     }
 
     public DosProcess? Parent { get; }
     public DosEnvironment Environment { get; }
     public string Name { get; }
     public string[] Args { get; }
+    public string Tail { get; }
     public OpenFile?[] Handles { get; } = new OpenFile?[DosKernel.MaxHandles];
 
     public OpenFile GetHandle(int handle)
@@ -52,6 +54,23 @@ internal sealed class DosProcess : IDos
         var file = GetHandle(handle);
         Handles[handle] = null;
         if (--file.RefCount == 0) file.Close();
+    }
+
+    public int DuplicateHandle(int handle)
+    {
+        var file = GetHandle(handle);
+        file.RefCount++;
+        return AllocHandle(file);
+    }
+
+    public void ForceDuplicateHandle(int source, int target)
+    {
+        var file = GetHandle(source);
+        if (target < 0 || target >= Handles.Length) throw new DosException(DosError.InvalidHandle);
+        if (source == target) return;
+        if (Handles[target] is not null) CloseHandle(target);
+        file.RefCount++;
+        Handles[target] = file;
     }
 
     /// <summary>把句柄 <paramref name="handle"/> 换成另一个文件（重定向用），返回原来的文件。</summary>
@@ -105,6 +124,9 @@ internal sealed class DosProcess : IDos
     public int Write(int handle, ReadOnlySpan<byte> data) => _kernel.Write(this, handle, data);
     public long Seek(int handle, long offset, SeekOrigin origin) => _kernel.Seek(this, handle, offset, origin);
     public void Close(int handle) => _kernel.Close(this, handle);
+    public int Duplicate(int handle) { _kernel.EnterCall(); return DuplicateHandle(handle); }
+    public void ForceDuplicate(int source, int target) { _kernel.EnterCall(); ForceDuplicateHandle(source, target); }
+    public string CommandTail { get { _kernel.EnterCall(); return Tail; } }
     public void Delete(string path) => _kernel.Delete(path);
     public void Rename(string from, string to) => _kernel.Rename(from, to);
     public IReadOnlyList<DirEntry> FindFiles(string pattern) => _kernel.FindFiles(pattern, DosAttributes.None);

@@ -96,7 +96,7 @@ internal sealed partial class DosKernel
         }
 
         string[] args = tail.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
-        var child = new DosProcess(this, parent, parent.Environment.Clone(), name, args);
+        var child = new DosProcess(this, parent, parent.Environment.Clone(), name, args, tail);
         child.InheritHandles(parent);
 
         var previous = CurrentProcess;

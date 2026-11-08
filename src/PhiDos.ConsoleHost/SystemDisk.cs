@@ -1,18 +1,16 @@
 using PhiDos.Core.Storage;
+using PhiDos.SystemDisk;
 
 namespace PhiDos.ConsoleHost;
 
-/// <summary>新建磁盘。M5 之后会把系统自带的外部命令（FORMAT 等）一起放进去。</summary>
+/// <summary>新建磁盘：默认是带系统命令的系统盘，--blank 时是空白盘。</summary>
 internal static class SystemDisk
 {
-    public static MemoryStream CreateInMemory()
-    {
-        var ms = Fat12Image.CreateInMemory();
-        return ms;
-    }
+    public static MemoryStream CreateInMemory() => SystemPrograms.CreateSystemDisk();
 
     public static void CreateFile(string path, DiskGeometry geometry, string? label, bool withPrograms)
     {
-        Fat12Image.Create(path, geometry, label);
+        if (withPrograms) SystemPrograms.CreateSystemDiskFile(path, geometry, label);
+        else Fat12Image.Create(path, geometry, label);
     }
 }
