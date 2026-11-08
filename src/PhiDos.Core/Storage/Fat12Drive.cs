@@ -521,6 +521,15 @@ public sealed class Fat12Drive : IDrive, IDisposable
         if (_stream.CanWrite) _stream.Flush();
     }
 
+    /// <summary>把整张盘的内容复制出来（先把 FAT 写回）。</summary>
+    public byte[] ToArray()
+    {
+        Flush();
+        var bytes = new byte[_geometry.ImageBytes];
+        ReadAt(0, bytes);
+        return bytes;
+    }
+
     public void Dispose()
     {
         try { Flush(); } catch (IOException) { }

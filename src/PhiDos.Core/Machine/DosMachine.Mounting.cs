@@ -43,3 +43,35 @@ public sealed partial class DosMachine
         => MountDrive(drive, new FolderDrive(folderPath, readOnly, capacityBytes));
 
 }
+
+// 游戏代码直接访问虚拟磁盘内容。
+public sealed partial class DosMachine
+{
+    /// <summary>
+    /// 在驱动器上执行一段操作，例如游戏剧情往玩家的盘里放一个文件。
+    /// 执行期间虚拟机线程不会同时访问这个驱动器。路径用规范化的大写 8.3 名字，
+    /// 可以先用 <see cref="Text.DosNames.Normalize"/> 转换。
+    /// </summary>
+    /// <remarks>
+    /// 如果 DOS 里的程序正打开着同一个文件，它不会看到这里做的修改，最好在程序不运行时调用。
+    /// </remarks>
+    public T WithDrive<T>(char drive, Func<IDrive, T> action)
+    {
+        var slot = Slot(drive);
+        lock (slot)
+        {
+            if (slot.Drive is null) throw new InvalidOperationException($"No disk in drive {drive}:.");
+            return action(slot.Drive);
+        }
+    }
+
+    public void WithDrive(char drive, Action<IDrive> action) => WithDrive<bool>(drive, d => { action(d); return true; });
+
+    /// <summary>
+    /// 把虚拟磁盘的当前内容完整导出（标准 FAT12 镜像），用于游戏存档。
+    /// 可以在虚拟机运行时调用。驱动器挂的是文件夹时抛出 InvalidOperationException。
+    /// </summary>
+    public byte[] ExportImage(char drive) => WithDrive(drive, d => d is Fat12Drive f
+        ? f.ToArray()
+        : throw new InvalidOperationException($"Drive {drive}: is not a virtual disk."));
+}

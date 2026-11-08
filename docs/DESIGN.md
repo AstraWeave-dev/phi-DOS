@@ -57,7 +57,8 @@ machine.Reset();                      // 重启
 machine.Stop();                       // 关机
 ~~~
 
-- 宿主与机器之间通过 IConsoleDevice 交换输出和按键（内部接口，Core 内定义）。终端宿主和 Godot 宿主各自实现屏幕绘制，Core 不感知宿主类型。
+- 宿主与机器之间通过 IConsoleDevice 交换输出和按键（Core 内定义）。图形宿主绘制 TextScreen（80×25 字符格，支持宽字符和 CGA 颜色属性）。
+- 游戏代码访问磁盘内容：WithDrive（和虚拟机线程互斥地读写驱动器）、ExportImage（导出虚拟磁盘的当前内容，用于存档）。终端宿主和 Godot 宿主各自实现屏幕绘制，Core 不感知宿主类型。
 - 开机信息：
 
       phi-DOS Version X.XX
@@ -198,7 +199,7 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 - M4 ✅：程序查找（当前目录 → PATH）与内置程序表。
 - M5 ✅：IL 程序加载器（可回收加载、取消检查注入），第一个 .COM 程序在磁盘上跑通。
 - M6 ✅：重定向、管道、批处理（IF/GOTO/FOR/SHIFT/ECHO）。
-- M7：Godot 宿主接入文档（详细版和速查版各一份），由使用者按文档接入 ProjectVN。
+- M7 ✅：Godot 宿主接入文档（详细版 docs/GODOT-INTEGRATION.md、速查版 docs/QUICKSTART.md），示例脚本在 docs/godot/，已用 Godot.NET.Sdk 4.5.1 以 net10.0 编译验证。由使用者按文档接入 ProjectVN。
 
 里程碑完成后在标题前标 ✅，对应的提交标题以 "M0："、"M1：" 这样的前缀开头。（远端仓库不接受推送 Git 标签，所以不打标签。）
 
