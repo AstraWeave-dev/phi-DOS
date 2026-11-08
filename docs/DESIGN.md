@@ -22,6 +22,9 @@ phi-DOS 是一个用 C# 实现的、行为仿照 MS-DOS 2.0 的磁盘操作系�
 
 ## 技术平台
 - .NET 10。
+- 字符集：UTF-8。控制台输出、文件内容、文件名都按 UTF-8 处理。
+  8.3 的限制按字节计算：主名最多 8 字节、扩展名最多 3 字节，所以一个主名最多放 2 个汉字。
+  字符屏幕上中日韩文字占两格。
 - ProjectVN 的 Godot 项目也需要以 net10.0 为目标框架，否则无法引用 Core。
 
 ## 分层架构
@@ -82,26 +85,30 @@ machine.Stop();                       // 关机
 - 当前目录路径最长 64 个字符。
 - 卷标：支持，DIR 首行显示卷标信息（如 "Volume in drive A has no label"）。
 
-## 核心接口（草案，修改需同步本文档）
+## 核心接口（修改需同步本文档）
+源码位于 src/PhiDos.Abi，下面是摘要。所有方法出错时抛出 DosException，其 Error 属性是 DOS 2.0 的错误码（DosError）。
+
 ~~~csharp
 public interface IDos
 {
-    // 控制台
+    // 控制台（走标准输入输出，跟随重定向和管道）
     void Write(string text);
     void WriteLine(string text = "");
-    char ReadKey(bool echo = true);
-    string ReadLine();
+    char ReadKey(bool echo = true);     // 功能键先返回 '\0'，下一次返回扫描码
+    string ReadLine();                  // 输入结束（重定向的文件读完）时返回 "\x1a"
+    bool KeyAvailable { get; }
 
     // 文件（句柄式，参照 DOS 2.0 INT 21h 3Ch-42h）
     int Create(string path);
     int Open(string path, FileAccessMode mode);
     int Read(int handle, Span<byte> buffer);
-    int Write(int handle, ReadOnlySpan<byte> data);
+    int Write(int handle, ReadOnlySpan<byte> data);   // 写 0 字节表示截断到当前位置
     long Seek(int handle, long offset, SeekOrigin origin);
     void Close(int handle);
     void Delete(string path);
     void Rename(string from, string to);
-    IReadOnlyList<DirEntry> FindFiles(string pattern);
+    IReadOnlyList<DirEntry> FindFiles(string pattern);                         // 只含普通文件
+    IReadOnlyList<DirEntry> FindFiles(string pattern, DosAttributes include);  // 额外包含目录/隐藏/系统/卷标
 
     // 驱动器与目录（2.0）
     char CurrentDrive { get; set; }
@@ -110,6 +117,8 @@ public interface IDos
     void ChangeDirectory(string path);
     void MakeDirectory(string path);
     void RemoveDirectory(string path);
+    DiskInfo GetDiskInfo(char drive);             // 容量、剩余空间、卷标
+    void FormatDisk(char drive, string? volumeLabel);  // 只支持虚拟磁盘
 
     // 进程与环境
     int Exec(string program, string args);
@@ -122,6 +131,10 @@ public interface IPhiProgram
     int Run(IDos dos, string[] args);
 }
 ~~~
+
+相比最初草案新增的成员：KeyAvailable、FindFiles 的带属性重载、GetDiskInfo、FormatDisk（FORMAT 和 DIR 需要）。
+
+句柄 0、1、2 分别是标准输入、标准输出、标准错误，3、4 是 AUX 和 PRN（都接到 NUL）。每个进程最多 20 个句柄，子程序继承父程序的全部句柄。
 
 ## 关键约定
 - 程序格式：.COM 文件是一个 .NET 程序集，内含一个实现 IPhiProgram 的公开类。加载器找到该类型并调用 Run。
@@ -144,14 +157,18 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 - Godot 宿主完成后，同样可导出为独立应用。
 
 ## 里程碑
-- M0：搭好解决方案结构和 DosMachine，终端版宿主能显示开机信息和 A> 提示符。
+- M0 ✅：搭好解决方案结构和 DosMachine，终端版宿主能显示开机信息和 A> 提示符。
 - M1：FAT12 虚拟磁盘只读支持、文件夹驱动器只读支持、路径解析器（盘符、\、.、..、每盘当前目录）。
 - M2：外壳与只读命令 DIR、CD、TYPE、REM、PAUSE、DATE、TIME。
 - M3：写操作 COPY、ERASE/DEL、RENAME/REN、MD、RD，两种驱动器均支持；新建空白 .phidisk。
 - M4：程序查找（当前目录 → PATH）与内置程序表。
 - M5：IL 程序加载器（可回收加载、取消检查注入），第一个 .COM 程序在磁盘上跑通。
 - M6：重定向、管道、批处理（IF/GOTO/FOR/SHIFT/ECHO）。
-- M7：Godot 宿主接入 ProjectVN，并可导出为独立应用。
+- M7：Godot 宿主接入文档（详细版和速查版各一份），由使用者按文档接入 ProjectVN。
+
+里程碑完成后在标题前标 ✅，并在 Git 中打上对应标签（m0、m1……）。
+
+外部命令范围：FORMAT（只对虚拟磁盘生效）、MORE、SORT、FIND。CHKDSK 不提供，输入后报 "Bad command or file name"。
 
 ## 验证方法
 在 DOSBox 中从镜像启动原版 MS-DOS 2.0，执行一组操作；在 phi-DOS 中挂载内容相同的 .phidisk（可以是同一个镜像改名），执行同样操作，比对输出（列宽、日期格式、错误提示）。差异即 bug。
