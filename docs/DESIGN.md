@@ -164,7 +164,7 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 - M1 ✅：FAT12 虚拟磁盘只读支持、文件夹驱动器只读支持、路径解析器（盘符、\、.、..、每盘当前目录）。
 - M2 ✅：外壳与只读命令 DIR、CD、TYPE、REM、PAUSE、DATE、TIME。
 - M3 ✅：写操作 COPY、ERASE/DEL、RENAME/REN、MD、RD，两种驱动器均支持；新建空白 .phidisk。
-- M4：程序查找（当前目录 → PATH）与内置程序表。
+- M4 ✅：程序查找（当前目录 → PATH）与内置程序表。
 - M5：IL 程序加载器（可回收加载、取消检查注入），第一个 .COM 程序在磁盘上跑通。
 - M6：重定向、管道、批处理（IF/GOTO/FOR/SHIFT/ECHO）。
 - M7：Godot 宿主接入文档（详细版和速查版各一份），由使用者按文档接入 ProjectVN。
