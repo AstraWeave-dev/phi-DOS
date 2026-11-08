@@ -19,7 +19,7 @@ public class BootTests
     public void EmptyLine_PrintsPromptAgainWithoutBlankLine()
     {
         using var m = new TestMachine();
-        Assert.Equal("\nA>", m.Run(""));
+        Assert.Equal("A>", m.Run(""));
     }
 
     [Fact]

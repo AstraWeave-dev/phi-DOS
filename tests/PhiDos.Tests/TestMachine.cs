@@ -33,13 +33,19 @@ internal sealed class TestMachine : IDisposable
         BootOutput = Machine.Console.TakeOutput();
     }
 
-    /// <summary>输入一行命令，等它执行完，返回这期间的全部输出（CR LF 统一成 \n）。</summary>
+    /// <summary>
+    /// 输入一行命令，等它执行完，返回这期间的输出（CR LF 统一成 \n）。
+    /// 开头回显的命令本身（命令文字、回车，以及 COMMAND 读完命令后输出的换行）会被去掉，只留命令产生的输出。
+    /// </summary>
     public string Run(string line)
     {
         Machine.Console.TakeOutput();
         Machine.Console.PushText(line + "\n");
         WaitIdle();
-        return Normalize(Machine.Console.TakeOutput());
+        string raw = Machine.Console.TakeOutput();
+        if (raw.StartsWith(line + "\r\r\n", StringComparison.Ordinal)) raw = raw[(line.Length + 3)..];
+        else if (raw.StartsWith(line + "\r", StringComparison.Ordinal)) raw = raw[(line.Length + 1)..];
+        return Normalize(raw);
     }
 
     /// <summary>送入按键但不加回车。</summary>
