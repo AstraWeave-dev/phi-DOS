@@ -4,8 +4,8 @@
 
 基于 IL 运行的 DOS 系统模块。
 
-phi-DOS 用 C# 按功能重新实现了 MS-DOS 2.0 的行为：8.3 文件名、子目录、COMMAND 的全部内置命令、
-批处理、重定向和管道，提示文字和输出格式与原版一致。和原版最大的不同是，磁盘上的 .COM / .EXE
+phi-DOS 是一个用 C# 独立编写的 DOS 风格操作系统模拟软件。它在操作上模仿经典 DOS 命令行：8.3 文件名、子目录、
+内置命令、批处理、重定向和管道，提示文字和输出格式也是 DOS 用户熟悉的样子。内部实现和 DOS 完全不同：磁盘上的 .COM / .EXE
 不是 x86 机器码，而是 .NET 程序集，由系统加载执行，所以可以跨架构运行。
 
 它既可以作为独立程序在电脑上运行，也可以嵌进 Godot 游戏，作为游戏里的一台"电脑"。
@@ -52,14 +52,16 @@ dotnet run --project src/PhiDos.ConsoleHost
 dotnet run --project src/PhiDos.ConsoleHost -- --help
 ```
 
-打包发布（Windows x86 / x64 / ARM64、Linux x64 / ARM64，每个平台一个完整版和一个小体积版）：
+打包发布（Windows x86 / x64 / ARM64、Linux x64 / ARM64）：
 
 ```
-./tools/release.sh          # Linux、macOS、WSL
-./tools/release.ps1         # Windows PowerShell
+./tools/release.sh 0.1.0                  # Linux、macOS、WSL
+./tools/release.ps1 -Version 0.1.0        # Windows PowerShell
 ```
 
-加上版本号：`./tools/release.sh 0.1.0`，程序里会显示 `phi-DOS Version 0.10`。结果在 `publish/release/`。也可以在 GitHub 的 Actions 页面运行 Release 工作流，由 GitHub 打包并发布到 Releases。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。小体积版约 1MB，需要电脑上装有 .NET 10 运行时；完整版约 30MB，自带运行时。
+版本号会编译进程序，`0.1.0` 显示为 `phi-DOS Version 0.10`；不写版本号时显示 `X.XX`。结果在 `publish/release/`。也可以在 GitHub 的 Actions 页面运行 Release 工作流，由 GitHub 打包并发布到 Releases。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。
+
+默认每个平台打一个约 1MB 的包，不带 .NET 运行时，电脑上需要装有 .NET 10 运行时。需要自带运行时的版本时加上 `--with-dotnet`（PowerShell 是 `-WithDotnet`，Actions 里勾选 with_dotnet），会另外打出 `-with-dotnet` 结尾的包，约 30MB，并附上 .NET 的授权文件。每个包里都有 `LICENSE.txt` 和 `THIRD-PARTY-NOTICES.txt`。
 
 ## 文档
 
@@ -88,5 +90,4 @@ docs/                   文档与 Godot 示例
 
 本项目以 MIT 协议发布，见 LICENSE。
 
-部分提示文字和行为参照了微软开源的 MS-DOS 2.0 源码（https://github.com/microsoft/MS-DOS ，MIT 协议），
-相关文件的开头保留了其版权声明。phi-DOS 与微软没有关联，也不使用 MS-DOS 商标。
+phi-DOS 是独立编写的软件，不包含其他操作系统的代码。用到的第三方组件及其授权见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。

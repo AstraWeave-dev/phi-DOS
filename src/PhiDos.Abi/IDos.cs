@@ -6,7 +6,7 @@ namespace PhiDos.Abi;
 /// </summary>
 /// <remarks>
 /// 所有方法出错时抛出 <see cref="DosException"/>，其中的 <see cref="DosException.Error"/>
-/// 对应 DOS 2.0 的错误码。修改本接口时必须同步更新 docs/DESIGN.md。
+/// 是错误码。修改本接口时必须同步更新 docs/DESIGN.md。
 /// </remarks>
 public interface IDos
 {
@@ -34,7 +34,7 @@ public interface IDos
     /// <summary>键盘缓冲区里是否有按键在等待读取。</summary>
     bool KeyAvailable { get; }
 
-    // ───────── 文件（句柄式，参照 DOS 2.0 INT 21h 3Ch-42h）─────────
+    // ───────── 文件（句柄式）─────────
 
     /// <summary>创建文件，已存在则清空。返回句柄。</summary>
     int Create(string path);
@@ -81,7 +81,7 @@ public interface IDos
     /// </summary>
     IReadOnlyList<DirEntry> FindFiles(string pattern, DosAttributes include);
 
-    // ───────── 驱动器与目录（2.0）─────────
+    // ───────── 驱动器与目录 ─────────
 
     /// <summary>当前驱动器，例如 'A'。</summary>
     char CurrentDrive { get; set; }

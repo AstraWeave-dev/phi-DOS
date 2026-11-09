@@ -1,7 +1,7 @@
 namespace PhiDos.Core.Shell;
 
 /// <summary>
-/// 数字和日期时间的显示格式，照 MS-DOS 2.0 COMMAND 的美国格式：
+/// 数字和日期时间的显示格式，经典 DOS 的美国格式：
 /// 月份和小时的十位是 0 时显示为空格，日、分、秒补 0。
 /// </summary>
 internal static class DosFormat

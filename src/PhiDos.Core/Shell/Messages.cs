@@ -1,13 +1,6 @@
-// 本文件中的提示文字取自 MS-DOS 2.0 源码（v2.0/source/TDATA.ASM 等）。
-//
-// MS-DOS v1.25 and v2.0 Source Code
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-// https://github.com/microsoft/MS-DOS
-
 namespace PhiDos.Core.Shell;
 
-/// <summary>COMMAND 的提示信息，文字与 MS-DOS 2.0 保持一致。</summary>
+/// <summary>COMMAND 的提示信息，用的是 DOS 用户熟悉的说法。</summary>
 internal static class Messages
 {
     public const string BadBatch = "\r\nBatch file missing\r\n";

@@ -85,7 +85,7 @@ public static class Fat12Image
         BinaryPrimitives.WriteUInt16LittleEndian(b.AsSpan(0x1A), (ushort)g.Heads);
         // 0x1C 起是隐藏扇区数和大扇区数，软盘为 0
 
-        // 扩展 BPB（DOS 4.0 才有，DOS 2.0 会忽略；写上它 mtools 和 Linux 能显示卷标）
+        // 扩展 BPB（较早的系统会忽略它；写上它 mtools 和 Linux 能显示卷标）
         b[0x26] = 0x29;
         uint serial = (uint)((now.Month << 24) | (now.Day << 16) | (now.Hour << 8) | now.Minute) ^ (uint)now.Year;
         BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(0x27), serial);

@@ -7,7 +7,7 @@ internal sealed partial class CommandShell
 {
     /// <summary>
     /// 处理一行里的管道（|）和重定向（&lt;、&gt;、&gt;&gt;），然后执行。
-    /// 管道照 DOS 2.0 的做法：前一个命令的输出先写进当前驱动器根目录的临时文件
+    /// 管道的做法：前一个命令的输出先写进当前驱动器根目录的临时文件
     /// %PIPE1.$$$ / %PIPE2.$$$，后一个命令再从这个文件读，用完删除。
     /// </summary>
     private void RunWithRedirection(string line)
@@ -168,7 +168,7 @@ internal sealed partial class CommandShell
                 string target = text[start..i];
                 if (c == '<') input = target;
                 else { output = target; append = isAppend; }
-                // 重定向符号前面的空格会留在命令里，所以 ECHO hi > X 写进文件的是 "hi "，和原版一样
+                // 重定向符号前面的空格会留在命令里，所以 ECHO hi > X 写进文件的是 "hi "，这是经典 DOS 的习惯
                 continue;
             }
             command.Append(c);

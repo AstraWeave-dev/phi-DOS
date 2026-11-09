@@ -73,7 +73,7 @@ machine.Dispose();
 | 回到 Godot 主线程 | `Callable.From(() => ...).CallDeferred()` |
 | 游戏时间当 DOS 时钟 | `Clock = () => gameTime` |
 | 开机不问日期 | `PromptForDateTimeAtBoot = false` |
-| 提示符用 2.0 原版的 `A>` | `DefaultPrompt = ""`（默认是 `$P$G`，即 `A:\>`） |
+| 提示符用早期 DOS 样式的 `A>` | `DefaultPrompt = ""`（默认是 `$P$G`，即 `A:\>`） |
 | EXIT 时关机 | `ExitPowersOff = true`，监听 `StateChanged` |
 
 ## 屏幕格子

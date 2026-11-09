@@ -1,6 +1,3 @@
-// 行为照 MS-DOS 2.0 的 FIND.ASM；提示文字取自 FINDMES.ASM。
-// MS-DOS v1.25 and v2.0 Source Code, Copyright (c) Microsoft Corporation. Licensed under the MIT License.
-
 using System;
 using System.Collections.Generic;
 using System.Text;

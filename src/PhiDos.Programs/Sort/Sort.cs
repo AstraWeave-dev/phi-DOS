@@ -1,6 +1,3 @@
-// 行为照 MS-DOS 2.0 的 SORT.ASM；提示文字取自 SORTMES.ASM。
-// MS-DOS v1.25 and v2.0 Source Code, Copyright (c) Microsoft Corporation. Licensed under the MIT License.
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +11,7 @@ namespace PhiDos.Programs;
 /// </summary>
 public sealed class Sort : IPhiProgram
 {
-    private const int MaxInput = 63 * 1024; // 原版一次最多排序 63KB
+    private const int MaxInput = 63 * 1024; // 一次最多排序 63KB
 
     public int Run(IDos dos, string[] args)
     {

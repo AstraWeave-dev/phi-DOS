@@ -57,7 +57,7 @@ public sealed class Ildosver : IPhiProgram
             BrightWhite + title + Reset,
             Gray + new string('-', title.Length) + Reset,
             Field("OS", $"phi-DOS {Version}"),
-            Field("Kernel", "IL-DOS, MS-DOS 2.0 behaviour"),
+            Field("Kernel", "IL-DOS"),
             Field("CPU", ".NET"),
             Field("Language", "IL"),
             Field("Shell", "COMMAND.COM"),

@@ -26,13 +26,13 @@ Contents
 14. Colours
 15. Error messages
 16. Limits
-17. Differences from MS-DOS 2.0
+17. Differences from classic DOS
 
 ---
 
 ## 1. What phi-DOS is
 
-phi-DOS is MS-DOS 2.0 re-implemented in C#. Its commands, output formats and messages follow the original. The two big differences are:
+phi-DOS is an independently written, DOS-style operating system simulator in C#. It works like a classic DOS command line, with the commands, output formats and messages DOS users know; inside it is entirely different and contains no code from any other operating system. The two big differences from classic DOS are:
 
 - .COM / .EXE programs on disk are .NET assemblies (IL), not x86 machine code.
 - All text is UTF-8, so Chinese and other scripts can be displayed, typed and used in file names.
@@ -180,7 +180,7 @@ Each drive remembers its own current directory. Type a drive letter and a colon 
 - Sizes 160K, 180K, 320K, 360K, 720K, 1.2M and 1.44M; other valid FAT12 layouts are accepted when reading.
 - Subdirectories and volume labels are supported.
 - When phidos mounts an image file, changes are written back to the file immediately.
-- "Booting" from one (for example in DOSBox) shows `Non-System disk or disk error`, like an original non-system disk.
+- "Booting" from one (for example in DOSBox) shows `Non-System disk or disk error`.
 
 ### 4.3 Folder drives
 
@@ -215,7 +215,7 @@ A folder on your computer used as a disk:
 
 ### 4.7 Disk errors
 
-Accessing an empty drive, or writing to a write-protected disk, gives the original critical-error prompt:
+Accessing an empty drive, or writing to a write-protected disk, gives a critical-error prompt:
 
 ```
 Not ready error reading drive B
@@ -232,7 +232,7 @@ Abort, Retry, Ignore?
 
 1. `phi-DOS Version X.XX` is shown.
 2. If drive A: has `AUTOEXEC.BAT` in its root, it runs.
-3. Otherwise you are asked for the date and time, like the original (`--no-date` skips this):
+3. Otherwise you are asked for the date and time (`--no-date` skips this):
 
    ```
    Current date is Sun 11-09-2026
@@ -285,7 +285,7 @@ Change it with `PROMPT`, using these codes:
 | `$$` | `$` |
 
 ```
-PROMPT $N$G            like MS-DOS 2.0: A>
+PROMPT $N$G            early DOS style: A>
 PROMPT $P$G            the default: A:\>
 PROMPT [$D $T]$_$P$G   date and time on one line, the path on the next
 PROMPT                 back to the default
@@ -858,8 +858,8 @@ TYPE LONG.TXT | FIND "phi" | MORE
 Details:
 
 - Redirection works for internal commands and programs alike; programs inherit it.
-- Like the original, the space before `>` stays in the command: `ECHO hi > X.TXT` writes `hi ` (with a trailing space). Write `ECHO hi> X.TXT` to avoid it.
-- Pipes work like the original, through temporary files: the first command's output goes to `%PIPE1.$$$` in the root of the current drive, and the next command reads it from there; the file is deleted afterwards. That is why `DIR | SORT` lists this file, as the original did. On a write-protected current drive, `Write protect error` appears first; after choosing I, the message is `Intermediate file error during pipe` and the pipe cannot run.
+- As in classic DOS, the space before `>` stays in the command: `ECHO hi > X.TXT` writes `hi ` (with a trailing space). Write `ECHO hi> X.TXT` to avoid it.
+- Pipes work through temporary files: the first command's output goes to `%PIPE1.$$$` in the root of the current drive, and the next command reads it from there; the file is deleted afterwards. That is why `DIR | SORT` lists this file, as classic DOS did. On a write-protected current drive, `Write protect error` appears first; after choosing I, the message is `Intermediate file error during pipe` and the pipe cannot run.
 - `<`, `>` and `|` inside double quotes are not redirection, so `FIND "a|b" X.TXT` works.
 
 ## 11. Batch files
@@ -899,7 +899,7 @@ ECHO Usage: BACKUP file
 
 - With ECHO on, each command is shown with the prompt before it runs. When the batch file ends, ECHO goes back to what it was before.
 - Lines starting with a colon are labels, targets for GOTO; they are not run.
-- Running another batch file from a batch file transfers to it and does not come back (2.0 has no CALL).
+- Running another batch file from a batch file transfers to it and does not come back (there is no CALL).
 - The batch file is reopened for every line. If it is deleted while running, the message is `Batch file missing` and it ends.
 - Ctrl+C while running asks `Terminate batch job (Y/N)?`: Y ends the batch file, N goes on with the next line.
 - A line is at most 127 bytes.
@@ -929,7 +929,7 @@ At boot:
 | Name | Value |
 |---|---|
 | `PATH` | empty |
-| `COMSPEC` | `A:\COMMAND.COM` (kept as in the original; there is no such file on disk) |
+| `COMSPEC` | `A:\COMMAND.COM` (kept as in classic DOS; there is no such file on disk) |
 
 Others that are used:
 
@@ -1013,11 +1013,11 @@ The terminal host passes these sequences to your terminal. Windows Terminal (the
 | Folder drive capacity | 360 KB by default, adjustable or unlimited |
 | SORT | 63 KB at once |
 
-## 17. Differences from MS-DOS 2.0
+## 17. Differences from classic DOS
 
-phi-DOS follows 2.0 as closely as it can. These differences are deliberate:
+phi-DOS works as much like classic DOS as it can. These differences are deliberate:
 
-| Area | MS-DOS 2.0 | phi-DOS |
+| Area | Classic DOS | phi-DOS |
 |---|---|---|
 | Programs | x86 machine code | .NET assemblies (IL) |
 | Character set | single-byte code page | UTF-8, including Chinese |

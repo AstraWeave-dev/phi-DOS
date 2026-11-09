@@ -15,7 +15,7 @@ public static class DosNames
     public const int NameBytes = 8;
     public const int ExtBytes = 3;
 
-    // DOS 2.0 文件名里不允许出现的字符
+    // 文件名里不允许出现的字符
     private const string InvalidChars = "\"/\\[]:|<>+=;, ";
 
     /// <summary>

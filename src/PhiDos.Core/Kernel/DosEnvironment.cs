@@ -43,7 +43,7 @@ internal sealed class DosEnvironment
         return true;
     }
 
-    /// <summary>开机时初始化用，允许空值（例如 DOS 2.0 默认就有一行 "PATH="）。</summary>
+    /// <summary>开机时初始化用，允许空值（例如开机时就有一行 "PATH="）。</summary>
     public void Init(string name, string value) => _vars.Add(new(name.ToUpperInvariant(), value));
 
     public DosEnvironment Clone()

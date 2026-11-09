@@ -23,7 +23,7 @@ internal sealed partial class DosKernel
     }
 
     /// <summary>
-    /// 按 DOS 2.0 的规则找程序文件。返回 null 表示找不到。
+    /// 按规则找程序文件。返回 null 表示找不到。
     /// 名字里带了盘符或路径时只在那里找，不再搜索 PATH。
     /// </summary>
     public DosPath? FindProgram(string name, DosEnvironment environment, bool allowBatch, Action<string>? badPathDrive = null)

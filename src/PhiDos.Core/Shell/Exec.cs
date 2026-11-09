@@ -5,7 +5,7 @@ namespace PhiDos.Core.Shell;
 internal sealed partial class CommandShell
 {
     /// <summary>
-    /// 不是内置命令时，按 DOS 2.0 的顺序找程序：当前目录，再到 PATH 里的每个目录；
+    /// 不是内置命令时，按这个顺序找程序：当前目录，再到 PATH 里的每个目录；
     /// 每个目录里依次找 .COM、.EXE、.BAT。都找不到就是 "Bad command or file name"。
     /// </summary>
     private void RunExternal(ShellCommand cmd)

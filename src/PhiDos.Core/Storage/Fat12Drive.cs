@@ -12,7 +12,7 @@ namespace PhiDos.Core.Storage;
 /// 磁盘从头到尾依次是：引导扇区（含 BPB）、FAT 表（通常两份）、根目录区、数据区。
 /// 根目录区大小固定；子目录和文件一样存放在数据区，由簇链串起来。
 /// FAT 表常驻内存，修改后在 Flush 时写回所有副本；目录和文件数据直接写入镜像。
-/// 布局与 MS-DOS 2.0 的 FAT.ASM、DIR.ASM 描述的一致，可以用 DOSBox、mtools 直接打开。
+/// 布局是标准的 FAT12，可以用 DOSBox、mtools 直接打开。
 /// </remarks>
 public sealed class Fat12Drive : IDrive, IDisposable
 {
@@ -284,7 +284,7 @@ public sealed class Fat12Drive : IDrive, IDisposable
 
     private static string Decode(byte[] bytes)
     {
-        // 原版 DOS 写入的名字是单字节代码页，不是合法 UTF-8 时按 Latin-1 显示，至少不会出错
+        // 别的系统写入的名字可能是单字节代码页，不是合法 UTF-8 时按 Latin-1 显示，至少不会出错
         try { return new UTF8Encoding(false, true).GetString(bytes); }
         catch (DecoderFallbackException) { return Encoding.Latin1.GetString(bytes); }
     }

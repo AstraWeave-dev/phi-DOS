@@ -4,7 +4,7 @@ using PhiDos.Core.Storage;
 
 namespace PhiDos.Tests;
 
-/// <summary>M2：只读命令。期望的输出逐字照 MS-DOS 2.0。</summary>
+/// <summary>M2：只读命令，逐字检查输出格式。</summary>
 public class ShellReadTests
 {
     private static readonly DateTime T = TestMachine.FixedTime;
@@ -33,7 +33,7 @@ public class ShellReadTests
         => new(m => m.MountImage('A', SampleDisk(label)));
 
     [Fact]
-    public void Dir_MatchesMsDos20Format()
+    public void Dir_MatchesClassicFormat()
     {
         using var m = WithSample();
         string expected =
