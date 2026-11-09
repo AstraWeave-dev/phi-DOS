@@ -624,6 +624,8 @@ VER
 
 Shows the version: `phi-DOS Version X.XX`.
 
+In a released build, X.XX is the release version shown DOS-style in two parts: release 0.1.0 shows 0.10, release 5.2.10 shows 5.21. A build of your own without a version shows X.XX.
+
 ### VERIFY
 
 ```

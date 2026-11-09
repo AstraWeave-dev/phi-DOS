@@ -65,7 +65,7 @@ Packaging for Windows x86 / x64 / ARM64 and Linux x64 / ARM64:
 ./tools/release.ps1         # Windows PowerShell
 ```
 
-The results go to `publish/release/`. The Release workflow on GitHub's Actions page does the same and publishes them to Releases.
+Add a version with `./tools/release.sh 0.1.0`; the programs then show `phi-DOS Version 0.10`. The results go to `publish/release/`. The Release workflow on GitHub's Actions page does the same and publishes them to Releases.
 
 ## Documentation
 

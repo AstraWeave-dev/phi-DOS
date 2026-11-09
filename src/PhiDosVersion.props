@@ -1,0 +1,28 @@
+<!--
+  phi-DOS 的版本号。编译时用 -p:PhiDosVersion=1.2.3 传入，不传时是占位符 X.XX。
+  导入它的项目会在编译前生成一个 PhiDosVersion.g.cs，里面是 BuildVersion.Raw 常量。
+  显示时换算成 DOS 风格的两段式（1.2.3 显示为 1.23），换算在 C# 里做。
+  目前导入它的项目：PhiDos.Core（开机信息、VER）、Ildosver（ILDOSVER 程序）。
+-->
+<Project>
+  <PropertyGroup>
+    <PhiDosVersion Condition="'$(PhiDosVersion)' == ''">X.XX</PhiDosVersion>
+  </PropertyGroup>
+
+  <Target Name="PhiDosGenerateVersion" BeforeTargets="CoreCompile">
+    <!-- 在目标里才取输出路径：导入这个文件的时候，SDK 还没算出 obj\Debug
+et10.0\ 这个路径 -->
+    <PropertyGroup>
+      <_PhiDosVersionFile>$(IntermediateOutputPath)PhiDosVersion.g.cs</_PhiDosVersionFile>
+    </PropertyGroup>
+    <!-- 只允许数字、点、横线和字母，避免奇怪的输入让生成的代码编译不过 -->
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(PhiDosVersion)', '^[0-9A-Za-z.\-]+$'))"
+           Text="PhiDosVersion '$(PhiDosVersion)' may only contain digits, letters, dots and hyphens." />
+    <WriteLinesToFile File="$(_PhiDosVersionFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="// 编译时生成，不要手动修改。;namespace PhiDos.Build%3B;internal static class BuildVersion { public const string Raw = &quot;$(PhiDosVersion)&quot;%3B }" />
+    <ItemGroup>
+      <Compile Include="$(_PhiDosVersionFile)" />
+      <FileWrites Include="$(_PhiDosVersionFile)" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -66,7 +66,10 @@ machine.Stop();                       // 关机
 
       phi-DOS Version X.XX
 
-  版本号 X.XX 为占位符，正式版本号确定后统一替换。
+  版本号在编译时传入：`-p:PhiDosVersion=1.2.3`（Release 工作流和 tools/release.sh 会自动传）。不传时是占位符 X.XX。
+  显示时换算成 DOS 风格的"主版本.两位次版本"：第一段是主版本，后面各段的数字依次接起来取前两位，不足补 0。
+  例如 0.1.0 显示 0.10，5.2.10 显示 5.21，2.0 显示 2.00，6.22 显示 6.22。Git 标签和 Release 标题用原样的版本号。
+  实现：src/PhiDosVersion.props 在编译前生成 BuildVersion.Raw 常量；PhiDos.Core（开机信息、VER、$V）和 ILDOSVER 都导入它，所以两边一定一致。
 
 ## 驱动器
 内核只通过驱动器接口 IDrive 访问存储，不关心底层实现。每个盘符可独立挂载以下两种之一。
@@ -218,7 +221,7 @@ phidos --phidisk 文件夹 镜像            镜像工具（发布包里的 phid
 终端版在没有指定 A 盘时，自动给 A 盘一张内存中的临时系统盘（带上述命令）。
 
 ### ILDOSVER（phi-DOS 自己加的系统信息展示）
-类似 neofetch：左边是彩色的 φ 图标，右边列出系统信息（OS 写 phi-DOS、CPU 写 .NET、语言写 IL 等，系统名和版本号直接写在程序里），最后是 16 色色板。当前驱动器的信息通过 GetDiskInfo 读取，环境变量 USER 决定标题里的用户名，没有时显示 guest。
+类似 neofetch：左边是彩色的 φ 图标，右边列出系统信息（OS 写 phi-DOS、CPU 写 .NET、语言写 IL 等，系统名写在程序里，版本号和系统一样在编译时生成），最后是 16 色色板。当前驱动器的信息通过 GetDiskInfo 读取，环境变量 USER 决定标题里的用户名，没有时显示 guest。
 
 ### VI（phi-DOS 自己加的全屏编辑器）
 DOS 2.0 没有全屏编辑器，原版只有 EDLIN。VI 模仿 vi 的手感，只做常用部分，不追求兼容：

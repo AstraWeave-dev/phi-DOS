@@ -59,7 +59,7 @@ dotnet run --project src/PhiDos.ConsoleHost -- --help
 ./tools/release.ps1         # Windows PowerShell
 ```
 
-结果在 `publish/release/`。也可以在 GitHub 的 Actions 页面运行 Release 工作流，由 GitHub 打包并发布到 Releases。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。小体积版约 1MB，需要电脑上装有 .NET 10 运行时；完整版约 30MB，自带运行时。
+加上版本号：`./tools/release.sh 0.1.0`，程序里会显示 `phi-DOS Version 0.10`。结果在 `publish/release/`。也可以在 GitHub 的 Actions 页面运行 Release 工作流，由 GitHub 打包并发布到 Releases。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。小体积版约 1MB，需要电脑上装有 .NET 10 运行时；完整版约 30MB，自带运行时。
 
 ## 文档
 
