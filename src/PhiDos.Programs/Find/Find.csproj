@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>FIND</AssemblyName>
+    <RootNamespace>PhiDos.Programs</RootNamespace>
+  </PropertyGroup>
+</Project>
