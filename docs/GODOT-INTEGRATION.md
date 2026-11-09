@@ -408,6 +408,8 @@ UnlockCommand.Unlocked += who => GetNode<DialogBox>("Dialog").Show($"{who} 解�
 
 ## 11. 编写自己的 .COM 程序
 
+更完整的说明（文件读写、管道、颜色和全屏界面、调试方法）见 [WRITING-PROGRAMS.md](WRITING-PROGRAMS.md)，这一节只是概要。
+
 ### 11.1 新建项目
 
 ```

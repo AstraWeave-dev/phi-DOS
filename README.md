@@ -45,14 +45,18 @@ dotnet run --project src/PhiDos.ConsoleHost
 dotnet run --project src/PhiDos.ConsoleHost -- --help
 ```
 
-发布成 Windows 单文件程序：
+打包发布（Windows x86 / x64 / ARM64、Linux x64 / ARM64，每个平台一个完整版和一个小体积版）：
 
 ```
-dotnet publish src/PhiDos.ConsoleHost -p:PublishProfile=win-x64
+./tools/release.sh          # Linux、macOS、WSL
+./tools/release.ps1         # Windows PowerShell
 ```
+
+结果在 `publish/release/`。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。小体积版约 1MB，需要电脑上装有 .NET 10 运行时；完整版约 30MB，自带运行时。
 
 ## 文档
 
+- [docs/WRITING-PROGRAMS.md](docs/WRITING-PROGRAMS.md)：编写自己的 .COM / .EXE 程序
 - [docs/QUICKSTART.md](docs/QUICKSTART.md)：速查
 - [docs/GODOT-INTEGRATION.md](docs/GODOT-INTEGRATION.md)：接入 Godot 的详细指南，包括编写自己的程序
 - [docs/DESIGN.md](docs/DESIGN.md)：设计文档
@@ -66,6 +70,8 @@ src/PhiDos.Core         虚拟机、内核、COMMAND、驱动器、程序加载�
 src/PhiDos.Programs     外部命令，每个命令一个项目
 src/PhiDos.SystemDisk   打包外部命令，新建系统盘
 src/PhiDos.ConsoleHost  终端版宿主（phidos）
+samples/Hello           程序示例
+tools/                  打包发布脚本
 tests/PhiDos.Tests      测试
 docs/                   文档与 Godot 示例
 ```
