@@ -10,7 +10,7 @@ internal sealed partial class CommandShell
 {
     private const int MaxBatchLine = 127;
 
-    /// <summary>正在运行的批处理。批处理里调用另一个批处理时直接换成新的（DOS 2.0 没有 CALL）。</summary>
+    /// <summary>正在运行的批处理。批处理里调用另一个批处理时直接换成新的（没有 CALL）。</summary>
     private sealed class BatchContext
     {
         public required string Path;
@@ -42,7 +42,7 @@ internal sealed partial class CommandShell
         _batch = null;
     }
 
-    /// <summary>执行批处理的下一行。批处理文件每读一行都重新打开一次，和原版一样。</summary>
+    /// <summary>执行批处理的下一行。批处理文件每读一行都重新打开一次。</summary>
     private void RunBatchStep()
     {
         var batch = _batch!;

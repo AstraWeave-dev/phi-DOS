@@ -170,7 +170,7 @@ internal sealed partial class CommandShell
     /// <summary>
     /// 显示提示符。按 $ 元字符展开（$P 当前路径、$G 大于号、$D 日期、$T 时间 ……）。
     /// 没有设置 PROMPT 时用 MachineOptions.DefaultPrompt（默认 $P$G，即 "A:\>"）；
-    /// 它也为空时和 MS-DOS 2.0 一样显示 "A>"。
+    /// 它也为空时显示 "A>"。
     /// </summary>
     private void PrintPrompt()
     {

@@ -105,7 +105,7 @@ internal sealed partial class DosKernel
         DriveOp(src.Drive, write: true, d =>
         {
             var entry = d.GetEntry(src.Parts) ?? throw NotFound(d, src);
-            // DOS 2.0 的改名不能用在目录上
+            // 改名不能用在目录上
             if (entry.IsDirectory || entry.IsVolumeLabel) throw new DosException(DosError.AccessDenied);
             if (d.GetEntry(dst.ParentParts) is not { IsDirectory: true } && dst.ParentParts.Length > 0)
                 throw new DosException(DosError.PathNotFound);

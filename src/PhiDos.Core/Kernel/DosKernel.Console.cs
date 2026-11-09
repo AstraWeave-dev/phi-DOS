@@ -43,7 +43,7 @@ internal sealed partial class DosKernel
     /// DOS 的整行输入（INT 21h 0Ah），从键盘读，回显到屏幕。
     /// 编辑键：退格删除；Esc 作废本行（显示 \ 并换行）；F1 从模板复制一个字符；
     /// F3 复制模板剩下的部分；F5 把当前输入设为新模板（显示 @ 并换行）。
-    /// 回车结束输入，只回显 CR，不换行，和原版一样。
+    /// 回车结束输入，只回显 CR，不换行（经典 DOS 的习惯）。
     /// </summary>
     public string ReadConsoleLine()
     {

@@ -1,6 +1,6 @@
 namespace PhiDos.Abi;
 
-/// <summary>DOS 2.0 的扩展错误码（INT 21h 出错时 AX 的值）。</summary>
+/// <summary>DOS 风格的错误码。</summary>
 public enum DosError
 {
     None = 0,
@@ -18,7 +18,7 @@ public enum DosError
     NotSameDevice = 17,
     NoMoreFiles = 18,
 
-    // 以下不是 DOS 2.0 的错误码，是 phi-DOS 为了表达更具体的情况加的。
+    // 以下是 phi-DOS 为了表达更具体的情况加的。
     DiskFull = 0x100,
     WriteProtected = 0x101,
     DriveNotReady = 0x102,

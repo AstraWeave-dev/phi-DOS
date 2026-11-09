@@ -124,7 +124,7 @@ internal sealed partial class DosKernel
             if (piece == ".") continue;
             if (piece == "..")
             {
-                // 根目录没有上一级：和原版一样报错，所以永远跑不出这个驱动器
+                // 根目录没有上一级：报错，所以永远跑不出这个驱动器
                 if (parts.Count == 0) throw new DosException(DosError.PathNotFound);
                 parts.RemoveAt(parts.Count - 1);
                 continue;

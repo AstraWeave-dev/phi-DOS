@@ -24,7 +24,7 @@
 
 ## 1. phi-DOS 的程序是什么
 
-在原版 DOS 里，.COM 和 .EXE 是 x86 机器码。在 phi-DOS 里，它们是 **.NET 程序集**（编译 C# 得到的那个 DLL），里面装的是 IL（中间语言）。
+在经典 DOS 里，.COM 和 .EXE 是 x86 机器码。在 phi-DOS 里，它们是 **.NET 程序集**（编译 C# 得到的那个 DLL），里面装的是 IL（中间语言）。
 
 运行一个程序时，系统会：
 
@@ -50,7 +50,7 @@
 仓库里有一个现成的示例 `samples/Hello`。
 
 ```
-dotnet build samples/Hello -p:PhiDosDrive=C:\Users\你\Downloads\phi-DOS-win-x64-small\A
+dotnet build samples/Hello -p:PhiDosDrive=C:\Users\你\Downloads\phi-DOS-win-x64\A
 ```
 
 `PhiDosDrive` 指向你发布包里的 `A` 文件夹。编译完成后，`HELLO.dll` 会被自动改名成 `HELLO.COM` 拷进去。
@@ -173,7 +173,7 @@ dos.WriteLine();
 ```
 
 - 用户可以用退格、Esc（作废重输）、F1、F3（复制上一次的输入）编辑。
-- 用户按回车时**只回显回车，不换行**，这是原版 DOS 的行为，所以读完一般要自己 `WriteLine()`。
+- 用户按回车时**只回显回车，不换行**，这是经典 DOS 的习惯，所以读完一般要自己 `WriteLine()`。
 - 一行最多 127 字节。
 - 标准输入被重定向到文件、并且已经读完时，返回 `"\x1a"`（Ctrl+Z）。
 
@@ -217,7 +217,7 @@ char c = dos.ReadKey(echo: false);
 
 用户按 Ctrl+C 时，程序会在下一次控制台调用时被终止，屏幕显示 `^C`。程序不需要处理它。
 
-纯计算的循环里不调用 IDos 时，和原版一样不理 Ctrl+C；用户可以先执行 `BREAK ON`，这样任何循环都能被 Ctrl+C 打断。无论如何，宿主的"重启"（终端版的 F12）总是有效的。
+纯计算的循环里不调用 IDos 时不理 Ctrl+C；用户可以先执行 `BREAK ON`，这样任何循环都能被 Ctrl+C 打断。无论如何，宿主的"重启"（终端版的 F12）总是有效的。
 
 ## 7. 颜色与全屏界面
 
@@ -362,7 +362,7 @@ catch (DosException e) when (e.Error == DosError.FileNotFound)
 | DiskFull | 磁盘满了 |
 | WriteProtected / DriveNotReady | 写保护 / 没插盘，用户在提示里选了 Ignore |
 
-写保护和没插盘时，屏幕会先出现原版的 `Abort, Retry, Ignore?`。用户选 Abort 时程序直接结束；选 Retry 会重试；选 Ignore 时你的程序才会收到 `DosException`。
+写保护和没插盘时，屏幕会先出现 `Abort, Retry, Ignore?`。用户选 Abort 时程序直接结束；选 Retry 会重试；选 Ignore 时你的程序才会收到 `DosException`。
 
 ## 9. 标准输入输出、重定向和管道
 
@@ -407,7 +407,7 @@ A:\>TYPE README.TXT | UPPER | MORE
 
 ### 数据来自管道时，怎样读键盘
 
-MORE 的做法（照原版）：
+MORE 的做法：
 
 ```csharp
 int data = dos.Duplicate(0);   // 复制一份标准输入，以后从它读数据
@@ -425,7 +425,7 @@ int code = dos.Exec("SORT", "/R");
 ```
 
 - 不写扩展名时依次找 .COM、.EXE；不写路径时先找当前目录，再按 PATH 找。
-- 不能用它运行 .BAT（原版 DOS 也不行）。
+- 不能用它运行 .BAT。
 - 子程序继承你的全部句柄，所以你的重定向也会传给它。
 - 返回子程序的退出码。找不到时抛出 `DosException(FileNotFound)`。
 

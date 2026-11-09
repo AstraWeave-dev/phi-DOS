@@ -51,7 +51,7 @@ public class BootTests
     }
 
     [Fact]
-    public void EmptyDefaultPrompt_IsMsDos20Style()
+    public void EmptyDefaultPrompt_IsClassicStyle()
     {
         using var m = new TestMachine(options: new() { PromptForDateTimeAtBoot = false, DefaultPrompt = "" });
         Assert.EndsWith("\r\n\r\nA>", m.BootOutput);

@@ -1,7 +1,7 @@
 # phi-DOS 设计文档
 
 ## 项目概述
-phi-DOS 是一个用 C# 实现的、行为仿照 MS-DOS 2.0 的磁盘操作系统。它有两种用法：
+phi-DOS 是一个用 C# 独立编写的 DOS 风格操作系统模拟软件，操作上模仿经典 DOS 命令行，内部实现完全不同。它有两种用法：
 
 1. 嵌入繁星工作室视觉小说 ProjectVN（Godot 4 .NET）内部，作为游戏中的"系统底层"支线。与 phi-engine 同属一个工作室产品线。
 2. 作为独立应用程序运行，挂载磁盘后直接使用，方便在电脑上开发和测试。
@@ -10,14 +10,13 @@ phi-DOS 是一个用 C# 实现的、行为仿照 MS-DOS 2.0 的磁盘操作系�
 
 ## 目标
 - 行为级重写：不模拟 CPU，用 C# 按功能重新实现 DOS 的行为。
-- 统一以 MS-DOS 2.0 为行为基准（含目录支持）。不混用 1.x 的行为。
-- 参考资料：微软开源的 MS-DOS 源码（MIT 协议，github.com/microsoft/MS-DOS），以 2.0 为主。源码为汇编，参考其逻辑与行为，不逐行翻译。
-- 保持原汁原味：8.3 文件名、目录、原版扩展名（.COM / .EXE / .BAT / .SYS）、原版提示信息。
+- 操作体验模仿经典 DOS 命令行（含目录支持）：用户看到的命令、提示文字和输出格式是 DOS 用户熟悉的样子。
+- 保持经典的味道：8.3 文件名、目录、.COM / .EXE / .BAT 扩展名、熟悉的提示信息。
 - 程序即 IL：磁盘上的 .COM 文件内容是 .NET 程序集（IL），由系统加载执行，跨架构运行。
 
 ## 非目标
-- 不运行原版 x86 二进制（未来可通过静态重编译或模拟器另行扩展）。
-- 不实现 FCB 式文件调用（只做 2.0 的句柄式 API）。
+- 不运行 x86 二进制。
+- 不实现 FCB 式文件调用（只做句柄式 API）。
 - 不实现 EMS、FAT16、大于 32MB 的分区、代码页切换、安装程序等硬件相关功能。
 
 ## 技术平台
@@ -79,7 +78,7 @@ machine.Stop();                       // 关机
 - 改名为 .img 后可被 DOSBox 和 mtools 直接挂载，便于往盘内放文件和对照测试。
 - 支持读写，包括子目录（子目录为普通簇链，必须写入 . 和 .. 两个目录项）。
 - 要求引导扇区含 BPB。读取时按 BPB 支持任意合法的 FAT12 软盘规格；新建时默认 360KB，也可选 160K、180K、320K、720K、1.2M、1.44M。
-- 新建的盘带一段极短的引导代码，从这张盘启动时显示 "Non-System disk or disk error"，和原版的非系统盘一样。
+- 新建的盘带一段极短的引导代码，从这张盘启动时显示 "Non-System disk or disk error"，和经典 DOS 的非系统盘一样。
 - 根目录项数固定（360KB 盘为 112 项），写满后无法再在根目录新建文件；子目录满了会自动扩展。
 
 ### 文件夹
@@ -87,17 +86,17 @@ machine.Stop();                       // 关机
 - 不符合 8.3 规则的文件和目录一律隐藏，不可访问。
 - 查找时不区分大小写；DOS 新建的文件和目录一律以大写名字写入。
 - 容量为设定值（默认 360KB），已用空间按文件夹内文件的实际大小累计。超出时报 "Insufficient disk space"。
-- 路径无法越出映射的文件夹：根目录没有上一级，在根目录执行 CD .. 会和原版一样报 "Invalid directory"；符号链接一律忽略。
+- 路径无法越出映射的文件夹：根目录没有上一级，在根目录执行 CD .. 会报 "Invalid directory"；符号链接一律忽略。
 - 文件夹里如果有 DOS 看不见的文件（长文件名等），RD 不会删除这个文件夹，避免误删电脑上的东西。
 
-## 路径与目录（照 2.0）
+## 路径与目录
 - 路径格式：可选盘符 + 以 \ 分隔的目录 + 8.3 文件名，支持 . 和 ..。
 - 每个驱动器各自维护一个当前目录。
 - 当前目录路径最长 64 个字符。
 - 卷标：支持，DIR 首行显示卷标信息（如 "Volume in drive A has no label"）。
 
 ## 核心接口（修改需同步本文档）
-源码位于 src/PhiDos.Abi，下面是摘要。所有方法出错时抛出 DosException，其 Error 属性是 DOS 2.0 的错误码（DosError）。
+源码位于 src/PhiDos.Abi，下面是摘要。所有方法出错时抛出 DosException，其 Error 属性是错误码（DosError）。
 
 ~~~csharp
 public interface IDos
@@ -109,7 +108,7 @@ public interface IDos
     string ReadLine();                  // 输入结束（重定向的文件读完）时返回 "\x1a"
     bool KeyAvailable { get; }
 
-    // 文件（句柄式，参照 DOS 2.0 INT 21h 3Ch-42h）
+    // 文件（句柄式）
     int Create(string path);
     int Open(string path, FileAccessMode mode);
     int Read(int handle, Span<byte> buffer);
@@ -123,7 +122,7 @@ public interface IDos
     IReadOnlyList<DirEntry> FindFiles(string pattern);                         // 只含普通文件
     IReadOnlyList<DirEntry> FindFiles(string pattern, DosAttributes include);  // 额外包含目录/隐藏/系统/卷标
 
-    // 驱动器与目录（2.0）
+    // 驱动器与目录
     char CurrentDrive { get; set; }
     string CurrentDirectory { get; }              // 当前驱动器的当前目录
     string GetCurrentDirectory(char drive);       // 指定驱动器的当前目录
@@ -153,7 +152,7 @@ public interface IPhiProgram
 | KeyAvailable | INT 21h 0Bh | 游戏类程序要不等待地检查按键 |
 | FindFiles(pattern, include) | INT 21h 4Eh 的属性参数 | DIR 要列出子目录 |
 | GetDiskInfo | INT 21h 36h | DIR 的剩余空间、FORMAT 的容量报告 |
-| FormatDisk | 无（原版 FORMAT 直接操作磁盘） | FORMAT 命令 |
+| FormatDisk | 无 | FORMAT 命令 |
 | Duplicate / ForceDuplicate | INT 21h 45h / 46h | MORE 从管道读数据、从键盘读按键 |
 | CommandTail | PSP 80h 处的命令尾 | FIND 要解析带空格的 "字符串" |
 
@@ -166,20 +165,20 @@ public interface IPhiProgram
 - 程序未处理的异常：显示 "Abnormal program termination" 和异常信息，退出码 255。
 - API 检查：加载时拒绝直接使用以下 API 的程序（只是基本防护，不是安全沙箱，反射之类的手段仍可绕过）：
   直接访问电脑文件（File、Directory、FileStream、StreamReader/Writer 等）、Process、Environment.Exit 等危险成员、Console、Assembly、Activator、Marshal、NativeLibrary、P/Invoke、Thread、ThreadPool、Timer、Task、Parallel，以及 System.Net、System.Reflection.Emit、System.Runtime.Loader 等命名空间。
-- 程序查找顺序（照 2.0）：内置命令 → 当前目录 → PATH 中的各目录；每个目录内依次找 .COM → .EXE → .BAT。都找不到输出 "Bad command or file name"。
+- 程序查找顺序：内置命令 → 当前目录 → PATH 中的各目录；每个目录内依次找 .COM → .EXE → .BAT。都找不到输出 "Bad command or file name"。
 - 内置程序表：部分外部命令可先用 Dictionary<string, Func<IPhiProgram>> 直接映射到 C# 实现，但磁盘上必须存在对应文件才能运行（删掉文件即不可用）。
 - 线程：每个程序在后台线程运行；输出写入线程安全队列，由宿主在主线程取出渲染。
 - 中断：IDos 每个方法开头检查 Ctrl+C。和 DOS 一样，BREAK OFF（默认）时只有控制台调用检查，BREAK ON 时所有调用都检查。
 - 注入检查点：加载时用 Mono.Cecil 在每个方法开头和每个回跳分支前插入 DosRuntime.Poll()。
   - 重启：Poll 总是响应，所以死循环也能被重启打断。
-  - Ctrl+C：Poll 只在 BREAK ON 时响应。BREAK OFF 时纯计算的死循环不理 Ctrl+C，只能重启，这和原版一致。
+  - Ctrl+C：Poll 只在 BREAK ON 时响应。BREAK OFF 时纯计算的死循环不理 Ctrl+C，只能重启，这是经典 DOS 的习惯。
   - 无限递归：Poll 会检查剩余栈空间，栈快用完时抛出可以捕获的异常，不会让整个游戏因栈溢出崩溃。
 - 被放弃的线程：.NET 10 不支持强制终止线程。重启时旧线程会收到 MachineHaltException；如果程序把异常吞掉继续运行，超过 16 次后线程会在 Poll 里永久睡眠，不再占用 CPU。
-- 提示符：没有设置 PROMPT 时用 MachineOptions.DefaultPrompt，默认 "$P$G"（显示 "A:\>"，这是 MS-DOS 6.0 起的默认值；2.0 原版是 "A>"，把 DefaultPrompt 设为空字符串即可恢复）。$P 只用记住的当前目录，不读盘，切到没插盘的驱动器时不会弹出错误。支持 PROMPT 及 $T $D $P $V $N $G $L $B $Q $H $E $_ $$ 元字符。
-- 重定向：< > >>。照原版，> 前面的空格会留在命令里（ECHO hi > X 写入 "hi "）。双引号里的 < > | 不当作重定向，方便 FIND "a|b"（这一点比原版宽松）。
-- 管道：照 2.0，前一个命令的输出写进当前驱动器根目录的临时文件 %PIPE1.$$$、%PIPE2.$$$，后一个命令从中读取，用完删除。所以 DIR | SORT 的结果里会看到这个临时文件，和原版一样。
+- 提示符：没有设置 PROMPT 时用 MachineOptions.DefaultPrompt，默认 "$P$G"（显示 "A:\>"；把 DefaultPrompt 设为空字符串则显示早期 DOS 样式的 "A>"）。$P 只用记住的当前目录，不读盘，切到没插盘的驱动器时不会弹出错误。支持 PROMPT 及 $T $D $P $V $N $G $L $B $Q $H $E $_ $$ 元字符。
+- 重定向：< > >>。> 前面的空格会留在命令里（ECHO hi > X 写入 "hi "），这是经典 DOS 的习惯。双引号里的 < > | 不当作重定向，方便 FIND "a|b"。
+- 管道：前一个命令的输出写进当前驱动器根目录的临时文件 %PIPE1.$$$、%PIPE2.$$$，后一个命令从中读取，用完删除。所以 DIR | SORT 的结果里会看到这个临时文件，这是经典 DOS 的做法。
 - 批处理：%0 到 %9、%%、%名字%（环境变量）、ECHO、GOTO（标号只比较前 8 个字符）、IF [NOT] ERRORLEVEL / EXIST / ==、FOR %%v IN (...) DO（不能嵌套）、SHIFT、PAUSE、REM。
-  批处理里运行另一个批处理是"转过去"不再回来（2.0 没有 CALL）。每执行一行都重新打开批处理文件，运行中被删除会显示 "Batch file missing"。
+  批处理里运行另一个批处理是"转过去"不再回来（没有 CALL）。每执行一行都重新打开批处理文件，运行中被删除会显示 "Batch file missing"。
   Ctrl+C 时询问 "Terminate batch job (Y/N)?"。批处理结束后 ECHO 恢复为开始前的状态。
 - 开机：A 盘根目录有 AUTOEXEC.BAT 时运行它，没有时询问日期和时间（MachineOptions.PromptForDateTimeAtBoot 可关闭）。
 
@@ -195,11 +194,11 @@ phidos --phidisk 文件夹 镜像            镜像工具（发布包里的 phid
 - 文件夹驱动器的容量可以设为不限（FolderDrive.Unlimited）：不再扫描文件夹，剩余空间显示宿主磁盘的实际剩余空间（最多 999999999 字节，保持 DIR 列宽）。
 - 镜像工具 phidisk：文件夹在前是打包，镜像在前是解包，只给镜像是列出内容。自动挑放得下的最小规格；不符合 8.3 的名字跳过并警告；保留文件时间。
 - 全部命令行用法见 docs/MANUAL.md。
-- 打包发布：tools/release.sh（Windows 上是 tools/release.ps1）一次生成 win-x86、win-x64、win-arm64、linux-x64、linux-arm64 五个平台，每个平台两种：
-  - 完整版：自带 .NET 运行时，开启单文件压缩，约 30MB。
-  - 小体积版：不带运行时，约 1MB，需要装有 .NET 10 运行时。
+- 打包发布：tools/release.sh（Windows 上是 tools/release.ps1）一次生成 win-x86、win-x64、win-arm64、linux-x64、linux-arm64 五个平台：
+  - 默认：phi-DOS-<平台>.zip，不带 .NET 运行时，约 1MB，需要装有 .NET 10 运行时。
+  - 加 --with-dotnet 时另外生成 phi-DOS-<平台>-with-dotnet.zip：自带 .NET 运行时，开启单文件压缩，约 30MB，附 .NET 的授权文件。
   32 位的 win-arm 从 .NET 7 起已不受支持，所以没有。不能开启裁剪（PublishTrimmed），磁盘上的程序可能用到 .NET 库里的任何东西。
-- 发布目录的结构：phidos(.exe)、run-phidos.bat（Linux 包是 run-phidos.sh）、A 文件夹（放好全部系统命令）。双击 bat 就会把 A 文件夹挂成 A 盘开机。bat 和 A 文件夹只在发布时生成，平时构建不涉及。
+- 发布目录的结构：phidos(.exe)、run-phidos.bat（Linux 包是 run-phidos.sh）、phidisk.bat（Linux 包是 phidisk）、A 文件夹（放好全部系统命令）、LICENSE.txt、THIRD-PARTY-NOTICES.txt；自带 .NET 的包另有 dotnet-runtime-licenses 文件夹。双击 bat 就会把 A 文件夹挂成 A 盘开机。bat 和 A 文件夹只在发布时生成，平时构建不涉及。
 - 也保留了单个平台的发布配置：`dotnet publish src/PhiDos.ConsoleHost -p:PublishProfile=win-x64`（另有 win-x64-small、linux-x64、osx-arm64）。
 - 终端里按 F12 重启虚拟机，在最外层输入 EXIT 退出。标准输入可以重定向为脚本文件，读完后自动关机。
 - 设置环境变量 PHIDOS_TRACE=1 时，内部错误会显示完整调用栈。
@@ -224,7 +223,7 @@ phidos --phidisk 文件夹 镜像            镜像工具（发布包里的 phid
 类似 neofetch：左边是彩色的 φ 图标，右边列出系统信息（OS 写 phi-DOS、CPU 写 .NET、语言写 IL 等，系统名写在程序里，版本号和系统一样在编译时生成），最后是 16 色色板。当前驱动器的信息通过 GetDiskInfo 读取，环境变量 USER 决定标题里的用户名，没有时显示 guest。
 
 ### VI（phi-DOS 自己加的全屏编辑器）
-DOS 2.0 没有全屏编辑器，原版只有 EDLIN。VI 模仿 vi 的手感，只做常用部分，不追求兼容：
+VI 模仿 vi 编辑器的手感，只做常用部分，不追求兼容：
 
 - 普通模式：h j k l 和方向键、0 ^ $、w b、gg G 和 数字G、Ctrl+F Ctrl+B 翻页、i a I A o O、x、dd、yy、p P、u（只能撤销一步，再按一次是重做，和原版 vi 一样）、/ ? n N 搜索。
 - 插入模式：打字、退格（在行首退格会和上一行合并）、回车、Esc 回到普通模式。
@@ -234,11 +233,12 @@ DOS 2.0 没有全屏编辑器，原版只有 EDLIN。VI 模仿 vi 的手感，�
 - 文件按 UTF-8 读写，保存时每行用 CR LF 结尾。Ctrl+C 会和其他 DOS 程序一样终止它，退出时清屏。
 
 ## 验证方法
-在 DOSBox 中从镜像启动原版 MS-DOS 2.0，执行一组操作；在 phi-DOS 中挂载内容相同的 .phidisk（可以是同一个镜像改名），执行同样操作，比对输出（列宽、日期格式、错误提示）。差异即 bug。
+对照经典 DOS 的实际表现：执行同样的操作，比对输出（列宽、日期格式、错误提示）。差异即 bug。镜像格式用 mtools 交叉检查。
 
 ## 授权与命名
-- 参照或移植 MS-DOS 源码逻辑的部分，保留其 MIT 版权声明。
-- 系统名称为 phi-DOS，不使用 MS-DOS 商标。
+- phi-DOS 以 MIT 协议发布。设计时参考了微软以 MIT 协议开源的 MS-DOS 源码（github.com/microsoft/MS-DOS），部分提示文字取自其中；程序本身用 C# 独立编写，没有包含或翻译它的代码。
+- MS-DOS 的授权声明和第三方组件（Mono.Cecil）的授权声明都在 THIRD-PARTY-NOTICES.md。
+- 系统名为 phi-DOS。代码和程序输出里不使用 MS-DOS 这个名字（ILDOSVER 不写基于什么）；README 和手册里在说明来源时提到它，并注明 MS-DOS 是 Microsoft Corporation 的注册商标、phi-DOS 与微软没有关联。发布包里附带 LICENSE.txt 和 THIRD-PARTY-NOTICES.txt；自带 .NET 运行时的包另附 .NET 的授权文件（dotnet-runtime-licenses 文件夹）。
 
 ## 协作规则（给 Claude Code）
 - 每次只做一个里程碑或一个模块，开始前先说明计划。

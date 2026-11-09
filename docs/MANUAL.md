@@ -26,13 +26,13 @@
 14. 颜色
 15. 错误提示一览
 16. 各种限制
-17. 和 MS-DOS 2.0 的区别
+17. 和经典 DOS 的区别
 
 ---
 
 ## 1. phi-DOS 是什么
 
-phi-DOS 是用 C# 重新实现的 MS-DOS 2.0。它的命令、输出格式、提示文字都照原版来，和原版最大的不同有两点：
+phi-DOS 是一个用 C# 独立编写的 DOS 风格操作系统模拟软件。它在操作上模仿经典 DOS 命令行，命令、输出格式、提示文字都是 DOS 用户熟悉的样子；内部实现和 DOS 完全不同。和经典 DOS 最大的不同有两点：
 
 - 磁盘上的 .COM / .EXE 程序是 .NET 程序集（IL），不是 x86 机器码。
 - 文字一律用 UTF-8，可以显示和输入中文，文件名里也能用中文。
@@ -180,7 +180,7 @@ phidisk games.phidisk
 - 支持 160K、180K、320K、360K、720K、1.2M、1.44M 七种规格，读取时也接受其他合法的 FAT12 规格。
 - 支持子目录和卷标。
 - 用 `phidos` 直接挂载文件时，改动实时写回文件。
-- 从非系统盘"启动"时（比如在 DOSBox 里），会显示 `Non-System disk or disk error`，和原版一样。
+- 从非系统盘"启动"时（比如在 DOSBox 里），会显示 `Non-System disk or disk error`。
 
 ### 4.3 文件夹驱动器
 
@@ -215,7 +215,7 @@ phidisk games.phidisk
 
 ### 4.7 磁盘错误
 
-访问没插盘的驱动器，或者在写保护的盘上写东西时，会出现原版的严重错误提示：
+访问没插盘的驱动器，或者在写保护的盘上写东西时，会出现严重错误提示：
 
 ```
 Not ready error reading drive B
@@ -232,7 +232,7 @@ Abort, Retry, Ignore?
 
 1. 显示 `phi-DOS Version X.XX`。
 2. 如果 A 盘根目录有 `AUTOEXEC.BAT`，运行它。
-3. 没有的话，像原版一样询问日期和时间（启动时加 `--no-date` 可以跳过）：
+3. 没有的话，询问日期和时间（启动时加 `--no-date` 可以跳过）：
 
    ```
    Current date is Sun 11-09-2026
@@ -285,7 +285,7 @@ Abort, Retry, Ignore?
 | `$$` | `$` |
 
 ```
-PROMPT $N$G            原版 2.0 的样子：A>
+PROMPT $N$G            早期 DOS 的样子：A>
 PROMPT $P$G            默认的样子：A:\>
 PROMPT [$D $T]$_$P$G   第一行显示日期时间，第二行是路径
 PROMPT                 恢复默认
@@ -858,8 +858,8 @@ TYPE LONG.TXT | FIND "phi" | MORE
 细节：
 
 - 重定向对内置命令和程序都有效，运行的程序会继承它。
-- 和原版一样，`>` 前面的空格会留在命令里：`ECHO hi > X.TXT` 写进文件的是 `hi `（带一个空格）。想要没有空格，写成 `ECHO hi> X.TXT`。
-- 管道照原版用临时文件中转：前一个命令的输出先写进当前驱动器根目录的 `%PIPE1.$$$`，后一个命令再从里面读，用完删除。所以 `DIR | SORT` 的结果里会看到这个临时文件，原版也是这样。当前驱动器是写保护的盘时，会先出现 `Write protect error`，选 I 之后显示 `Intermediate file error during pipe`，管道无法使用。
+- `>` 前面的空格会留在命令里（经典 DOS 的习惯）：`ECHO hi > X.TXT` 写进文件的是 `hi `（带一个空格）。想要没有空格，写成 `ECHO hi> X.TXT`。
+- 管道用临时文件中转：前一个命令的输出先写进当前驱动器根目录的 `%PIPE1.$$$`，后一个命令再从里面读，用完删除。所以 `DIR | SORT` 的结果里会看到这个临时文件，经典 DOS 也是这样。当前驱动器是写保护的盘时，会先出现 `Write protect error`，选 I 之后显示 `Intermediate file error during pipe`，管道无法使用。
 - 双引号里的 `<`、`>`、`|` 不算重定向，所以 `FIND "a|b" X.TXT` 可以用。
 
 ## 11. 批处理
@@ -899,7 +899,7 @@ ECHO Usage: BACKUP file
 
 - ECHO 开着时，每条命令执行前会连同提示符一起显示出来。批处理结束后，ECHO 恢复成开始前的状态。
 - 以冒号开头的行是标号，只用来给 GOTO 跳转，本身不执行。
-- 批处理里运行另一个批处理，是"转过去"不再回来（2.0 没有 CALL）。
+- 批处理里运行另一个批处理，是"转过去"不再回来（没有 CALL）。
 - 每执行一行都会重新打开批处理文件读下一行。运行中文件被删掉了，会显示 `Batch file missing` 并结束。
 - 运行中按 Ctrl+C，会问 `Terminate batch job (Y/N)?`，Y 结束整个批处理，N 继续下一行。
 - 一行最长 127 字节。
@@ -929,7 +929,7 @@ FIND "x" A.TXT > NUL    只要退出码，不要输出
 | 名字 | 值 |
 |---|---|
 | `PATH` | 空 |
-| `COMSPEC` | `A:\COMMAND.COM`（只是照原版保留，盘上并没有这个文件） |
+| `COMSPEC` | `A:\COMMAND.COM`（只是照经典 DOS 的习惯保留，盘上并没有这个文件） |
 
 其他会用到的：
 
@@ -1013,11 +1013,11 @@ PROMPT $E[1;32m$P$G$E[0m
 | 文件夹驱动器默认容量 | 360KB，可以改或设为不限 |
 | SORT | 一次 63KB |
 
-## 17. 和 MS-DOS 2.0 的区别
+## 17. 和经典 DOS 的区别
 
-phi-DOS 尽量照 2.0 的行为做，下面是有意不同的地方：
+phi-DOS 在操作上尽量接近经典 DOS，下面是有意不同的地方：
 
-| 方面 | MS-DOS 2.0 | phi-DOS |
+| 方面 | 经典 DOS | phi-DOS |
 |---|---|---|
 | 程序 | x86 机器码 | .NET 程序集（IL） |
 | 字符集 | 单字节代码页 | UTF-8，支持中文 |
@@ -1029,3 +1029,9 @@ phi-DOS 尽量照 2.0 的行为做，下面是有意不同的地方：
 | 没有实现 | — | CTTY、FCB 方式的文件调用、CHKDSK、EDLIN、DEBUG、DISKCOPY、SYS 等外部命令 |
 | COMMAND.COM | 盘上的文件 | 内置，盘上不需要这个文件 |
 | Ctrl+C | 纯计算的循环无法打断 | 同样无法打断，但 BREAK ON 时可以；宿主的重启总能打断 |
+
+## 来源与授权
+
+phi-DOS 在设计时参考了微软以 MIT 协议开源的 [MS-DOS 源码](https://github.com/microsoft/MS-DOS)，部分提示文字取自其中。phi-DOS 本身是用 C# 独立编写的，没有包含或翻译 MS-DOS 的代码。授权声明见仓库根目录的 [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md)，发布包里是 `THIRD-PARTY-NOTICES.txt`。
+
+MS-DOS 是 Microsoft Corporation 的注册商标。phi-DOS 与微软没有关联，也没有得到微软的赞助或认可。

@@ -36,7 +36,7 @@ public class BatchTests
         Assert.Equal("\nA>", m.Run("VER > V.TXT"));
         Assert.Equal("\nphi-DOS Version X.XX", Type(m, "V.TXT"));
         m.Run("ECHO second >> V.TXT");
-        Assert.Equal("\nphi-DOS Version X.XX\nsecond ", Type(m, "V.TXT")); // 原版也会留下 > 前面的空格
+        Assert.Equal("\nphi-DOS Version X.XX\nsecond ", Type(m, "V.TXT")); // > 前面的空格会留下
         m.Run("ECHO replaced>V.TXT");
         Assert.Equal("replaced", Type(m, "V.TXT"));
     }
@@ -55,7 +55,7 @@ public class BatchTests
         using var m = Boot(("WORDS.TXT", "pear\napple\nfig\n"));
         Assert.Equal("pear\nfig\napple\n\nA>", m.Run("TYPE WORDS.TXT | SORT /R"));
         Assert.Equal("apple\n\nA>", m.Run("TYPE WORDS.TXT | SORT | FIND \"pp\""));
-        // 和原版一样：管道用的临时文件会出现在 DIR 的结果里，用完就删掉
+        // 管道用的临时文件会出现在 DIR 的结果里，用完就删掉
         Assert.Contains("%PIPE1   $$$", m.Run("DIR | SORT"));
         Assert.DoesNotContain("%PIPE", m.Run("DIR"));
     }

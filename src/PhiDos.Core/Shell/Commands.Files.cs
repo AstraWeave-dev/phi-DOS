@@ -13,7 +13,7 @@ internal sealed partial class CommandShell
 
     /// <summary>
     /// DIR [盘:][路径][文件名] [/P] [/W]
-    /// 输出格式照 MS-DOS 2.0 的 TCODE4.ASM：名字 8 格、扩展名 3 格、大小 9 格右对齐，
+    /// 输出格式：名字 8 格、扩展名 3 格、大小 9 格右对齐，
     /// 然后是日期和 12 小时制时间；/W 每行五个名字，用制表符隔开。
     /// </summary>
     private void DirCommand(ShellCommand cmd)

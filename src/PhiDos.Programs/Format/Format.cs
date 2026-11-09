@@ -1,6 +1,3 @@
-// 提示文字取自 MS-DOS 2.0 源码（v2.0/source/FORMES.ASM）。
-// MS-DOS v1.25 and v2.0 Source Code, Copyright (c) Microsoft Corporation. Licensed under the MIT License.
-
 using System;
 using PhiDos.Abi;
 

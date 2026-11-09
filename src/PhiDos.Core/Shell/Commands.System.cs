@@ -71,7 +71,7 @@ internal sealed partial class CommandShell
 
     /// <summary>
     /// 解析 月-日-年（分隔符可以是 - / .）。年份写两位时按 19xx 处理，
-    /// 和 DOS 2.0 一样只接受 1980 到 2099 年。
+    /// 只接受 1980 到 2099 年。
     /// </summary>
     private bool TrySetDate(string text)
     {
@@ -169,7 +169,7 @@ internal sealed partial class CommandShell
     {
         if (_isPrimary)
         {
-            // 原版最外层的 EXIT 什么也不做；宿主可以让它关机
+            // 经典 DOS 最外层的 EXIT 什么也不做；宿主可以让它关机
             if (_kernel.Machine.Options.ExitPowersOff) _kernel.Machine.PowerOffFromInside(_kernel.Gate);
             return;
         }

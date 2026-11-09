@@ -1,24 +1,32 @@
 # 打包发布终端版（Windows PowerShell 版，和 release.sh 做同样的事）。结果在 publish/release/ 下。
-#   phi-DOS-<平台>.zip        完整版，自带 .NET 运行时
-#   phi-DOS-<平台>-small.zip  小体积版，需要电脑上装有 .NET 10 运行时
+#
+#   .\tools\release.ps1 [-Version 1.2.3] [-WithDotnet]
+#
+# 默认每个平台打一个包 phi-DOS-<平台>.zip：不带 .NET 运行时，约 1MB，电脑上需要装有 .NET 10 运行时。
+# 加 -WithDotnet 时再多打 phi-DOS-<平台>-with-dotnet.zip：自带 .NET 运行时，附上 .NET 的授权文件。
+# 版本号会编译进程序，1.2.3 显示为 1.23；不给时显示 X.XX。也可以用环境变量 PHIDOS_VERSION。
 # 注意：Compress-Archive 不会保留 Linux 的可执行权限，Linux 包解压后要 chmod +x phidos run-phidos.sh phidisk。
-# 版本号：.\tools\release.ps1 1.2.3（或者设置环境变量 PHIDOS_VERSION）。程序里显示为 1.23，不给时显示 X.XX。
-param([string]$Version = $env:PHIDOS_VERSION)
+param(
+    [string]$Version = $env:PHIDOS_VERSION,
+    [switch]$WithDotnet
+)
 $ErrorActionPreference = 'Stop'
 Set-Location (Join-Path $PSScriptRoot '..')
 
 $rids = 'win-x86', 'win-x64', 'win-arm64', 'linux-x64', 'linux-arm64'
+$kinds = @('small')
+if ($WithDotnet) { $kinds += 'with-dotnet' }
 $out = 'publish/release'
 if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory $out | Out-Null
 
 foreach ($rid in $rids) {
-    foreach ($kind in 'full', 'small') {
-        $name = "phi-DOS-$rid"
+    foreach ($kind in $kinds) {
         if ($kind -eq 'small') {
-            $name += '-small'
+            $name = "phi-DOS-$rid"
             $mode = @('--self-contained', 'false')
         } else {
+            $name = "phi-DOS-$rid-with-dotnet"
             $mode = @('--self-contained', 'true', '-p:EnableCompressionInSingleFile=true')
         }
         Write-Host "==> $name"

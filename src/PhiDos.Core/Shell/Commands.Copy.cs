@@ -13,7 +13,7 @@ internal sealed partial class CommandShell
 
     /// <summary>
     /// COPY [/A|/B] 源[/A|/B] [+ 源[/A|/B] ...] [目标[/A|/B]] [/V]
-    /// 行为照 MS-DOS 2.0 的 COPY.ASM：
+    /// 行为：
     /// 源里有通配符或在连接复制时逐个显示源文件名；多个源写进同一个文件即连接复制，
     /// 连接时默认按文本方式（读到 Ctrl+Z 为止，结尾补 Ctrl+Z）；
     /// 出错时删除写了一半的目标文件，最后显示复制了几个文件。

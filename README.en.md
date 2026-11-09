@@ -4,9 +4,10 @@
 
 A DOS that runs IL programs.
 
-phi-DOS re-implements the behaviour of MS-DOS 2.0 in C#: 8.3 file names, subdirectories, every internal
-command of COMMAND, batch files, redirection and pipes, with the original messages and output formats.
-The big difference: .COM / .EXE files on disk are not x86 machine code but .NET assemblies, loaded and
+phi-DOS is an independently written, DOS-style operating system simulator in C#. It works like a classic DOS
+command line: 8.3 file names, subdirectories, internal commands, batch files, redirection and pipes, with the
+messages and output formats DOS users know. Inside it is entirely different: .COM / .EXE files on disk are not
+x86 machine code but .NET assemblies, loaded and
 run by the system, so they work on any CPU architecture.
 
 It runs as a stand-alone program on your computer, and can also be embedded in a Godot game as an
@@ -45,7 +46,7 @@ A:\>
 
 Get the zip for your platform from [Releases](https://github.com/AstroCanvas-dev/phi-DOS/releases), unpack it and double-click `run-phidos.bat` (on Linux run `run-phidos.sh`). The `A` folder next to it becomes drive A:.
 
-Packages without `-small` include the .NET runtime. The `-small` ones are about 1 MB and need the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
+The packages are about 1 MB and need the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Packages ending in `-with-dotnet`, when a release has them, include the runtime.
 
 ## Build and run
 
@@ -65,7 +66,7 @@ Packaging for Windows x86 / x64 / ARM64 and Linux x64 / ARM64:
 ./tools/release.ps1         # Windows PowerShell
 ```
 
-Add a version with `./tools/release.sh 0.1.0`; the programs then show `phi-DOS Version 0.10`. The results go to `publish/release/`. The Release workflow on GitHub's Actions page does the same and publishes them to Releases.
+Add a version with `./tools/release.sh 0.1.0`; the programs then show `phi-DOS Version 0.10`. Add `--with-dotnet` to also build packages that include the .NET runtime (about 30 MB, with the .NET licence files). Every package contains `LICENSE.txt` and `THIRD-PARTY-NOTICES.txt`. The results go to `publish/release/`. The Release workflow on GitHub's Actions page does the same and publishes them to Releases.
 
 ## Documentation
 
@@ -94,6 +95,8 @@ docs/                   documentation and Godot samples
 
 MIT, see LICENSE.
 
-Some messages and behaviour follow Microsoft's open-source MS-DOS 2.0 code
-(https://github.com/microsoft/MS-DOS, MIT licence); the files concerned keep its copyright notice.
-phi-DOS is not affiliated with Microsoft and does not use the MS-DOS trademark.
+phi-DOS was designed with reference to Microsoft's [MS-DOS source code](https://github.com/microsoft/MS-DOS), released under the MIT licence, and some of its messages are taken from it.
+phi-DOS itself is written independently in C# and does not contain or translate the MS-DOS code. The MS-DOS licence notice and the licences of other third-party components are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+MS-DOS is a registered trademark of Microsoft Corporation. phi-DOS is not affiliated with, sponsored by or endorsed by Microsoft.
+Third-party components and their licences are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

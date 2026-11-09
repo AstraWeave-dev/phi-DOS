@@ -1,6 +1,3 @@
-// 行为照 MS-DOS 2.0 的 MORE.ASM；提示文字取自 MOREMES.ASM。
-// MS-DOS v1.25 and v2.0 Source Code, Copyright (c) Microsoft Corporation. Licensed under the MIT License.
-
 using System;
 using System.Text;
 using PhiDos.Abi;
@@ -18,7 +15,7 @@ public sealed class More : IPhiProgram
 
     public int Run(IDos dos, string[] args)
     {
-        // 和原版一样：把标准输入复制一份用来读数据，再让标准输入改为指向标准错误（键盘），
+        // 把标准输入复制一份用来读数据，再让标准输入改为指向标准错误（键盘），
         // 这样即使数据来自管道，"按任意键继续"也能读到真正的键盘。
         int data = dos.Duplicate(0);
         dos.Close(0);

@@ -205,7 +205,7 @@ Machine.Start();
 - 普通字符：`new KeyInput('a')`。回车、退格、Esc、Tab 这些有现成的常量：`KeyInput.Enter`、`KeyInput.Backspace`、`KeyInput.Escape`、`KeyInput.Tab`。
 - 特殊键：`KeyInput.Special(DosKey.F3)`，支持 F1 到 F10、方向键、Home、End、PageUp、PageDown、Insert、Delete。
 
-`KeyInput.CtrlC` 是 Ctrl+C，它会清空键盘缓冲区并打断当前程序，和原版一样。
+`KeyInput.CtrlC` 是 Ctrl+C，它会清空键盘缓冲区并打断当前程序。
 
 示例的 `DosKeyMap.Translate` 已经处理好对应关系：
 
@@ -400,7 +400,7 @@ UnlockCommand.Unlocked += who => GetNode<DialogBox>("Dialog").Show($"{who} 解�
 
 - 节点离开场景树时一定要 `Dispose()`，示例在 `_ExitTree` 里做了。否则后台线程会一直留着，在 Godot 编辑器里还会妨碍重新编译。
 - `MachineOptions.ExitPowersOff` 设为 true 时，在最外层输入 EXIT 会关机。游戏里可以借此"关电脑"，监听 `StateChanged` 收到 Stopped 后关闭终端界面。
-- 死循环：程序加载时系统会在每个循环里插入检查点，所以 `Reset()` 总能打断它。BREAK ON 时 Ctrl+C 也能打断；BREAK OFF（默认）时和原版一样，纯计算的死循环不理 Ctrl+C。
+- 死循环：程序加载时系统会在每个循环里插入检查点，所以 `Reset()` 总能打断它。BREAK ON 时 Ctrl+C 也能打断；BREAK OFF（默认）时纯计算的死循环不理 Ctrl+C。
 - 无限递归不会让游戏崩溃，程序会以 "Abnormal program termination" 结束。
 - 一个程序把所有异常都吞掉、拒绝退出时，重启后它的线程会被永久冻结，不占 CPU，只占少量内存。
 
@@ -526,7 +526,7 @@ public class Hello : IPhiProgram
 字体的中文宽度不是英文的两倍，换一个中英文 2:1 的等宽字体。
 
 **开机后一直停在 "Current date is ..."。**
-这是原版行为：盘上没有 AUTOEXEC.BAT 时会问日期和时间。把 `PromptForDateTimeAtBoot` 设为 false，或者在盘里放一个 AUTOEXEC.BAT。
+这是经典 DOS 的习惯：盘上没有 AUTOEXEC.BAT 时会问日期和时间。把 `PromptForDateTimeAtBoot` 设为 false，或者在盘里放一个 AUTOEXEC.BAT。
 
 **输入程序名后显示 "Error in EXE file"。**
 下一行会写原因。常见的有：不是 .NET 程序集；没有实现 IPhiProgram 的公开类；用了被禁止的 API；引用了别的 DLL。

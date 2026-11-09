@@ -33,7 +33,7 @@ public class Fat12Tests
     {
         using var d = NewDisk();
         var space = d.GetSpace();
-        Assert.Equal(362_496, space.TotalBytes); // 和 DOS 2.0 FORMAT 报告的一致
+        Assert.Equal(362_496, space.TotalBytes); // 360KB 软盘可用的数据区大小
         Assert.Equal(362_496, space.FreeBytes);
         Assert.Equal(1024, space.BytesPerCluster);
         Assert.Null(d.VolumeLabel);

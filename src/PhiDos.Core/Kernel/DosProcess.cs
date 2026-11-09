@@ -81,7 +81,7 @@ internal sealed class DosProcess : IDos
         return old;
     }
 
-    /// <summary>子进程继承父进程的全部句柄（DOS 2.0 的行为，重定向正是靠它传给子程序）。</summary>
+    /// <summary>子进程继承父进程的全部句柄（重定向正是靠它传给子程序）。</summary>
     public void InheritHandles(DosProcess parent)
     {
         for (int i = 0; i < Handles.Length; i++)

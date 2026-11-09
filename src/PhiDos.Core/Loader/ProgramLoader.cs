@@ -19,7 +19,7 @@ internal sealed class LoadedProgram(IPhiProgram program, Action unload) : IDispo
 /// </summary>
 internal sealed class ProgramLoader(DosKernel kernel)
 {
-    /// <summary>程序文件的大小上限。DOS 2.0 的常规内存是 640KB，这里也用这个数。</summary>
+    /// <summary>程序文件的大小上限。早年 PC 的常规内存是 640KB，这里也用这个数。</summary>
     private const int MaxImageSize = 640 * 1024;
 
     public LoadedProgram Load(DosPath path)

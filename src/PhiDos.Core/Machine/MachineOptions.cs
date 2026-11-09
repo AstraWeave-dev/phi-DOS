@@ -9,19 +9,19 @@ public sealed class MachineOptions
     public int DriveCount { get; init; } = 2;
 
     /// <summary>
-    /// 启动盘上没有 AUTOEXEC.BAT 时，是否像 DOS 2.0 一样在开机时询问日期和时间。
+    /// 启动盘上没有 AUTOEXEC.BAT 时，是否在开机时询问日期和时间（经典 DOS 的习惯）。
     /// </summary>
     public bool PromptForDateTimeAtBoot { get; init; } = true;
 
     /// <summary>
     /// 在最外层的 COMMAND 里执行 EXIT 时是否关机。
-    /// 原版 DOS 的 EXIT 在最外层什么都不做；终端版宿主把它设为 true，方便退出。
+    /// 经典 DOS 的 EXIT 在最外层什么都不做；终端版宿主把它设为 true，方便退出。
     /// </summary>
     public bool ExitPowersOff { get; init; }
 
     /// <summary>
-    /// 没有设置 PROMPT 环境变量时使用的提示符。默认 "$P$G"，显示为 "A:\>"、"A:\GAMES>"（MS-DOS 6.0 起的默认值）。
-    /// 设为空字符串则和 MS-DOS 2.0 一样只显示 "A>"。
+    /// 没有设置 PROMPT 环境变量时使用的提示符。默认 "$P$G"，显示为 "A:\>"、"A:\GAMES>"。
+    /// 设为空字符串则只显示 "A>"，也就是早期 DOS 的样子。
     /// </summary>
     public string DefaultPrompt { get; init; } = "$P$G";
 
@@ -42,7 +42,7 @@ public sealed class MachineOptions
     /// <summary>加载程序时是否拒绝调用危险 API（直接访问电脑文件、退出进程等）的程序。</summary>
     public bool VerifyPrograms { get; init; } = true;
 
-    /// <summary>环境变量区大小（字节）。DOS 2.0 默认 160 字节，超出时报 "Out of environment space"。</summary>
+    /// <summary>环境变量区大小（字节）。默认 160 字节，超出时报 "Out of environment space"。</summary>
     public int EnvironmentSize { get; init; } = 160;
 
     /// <summary>虚拟机线程的栈大小。</summary>

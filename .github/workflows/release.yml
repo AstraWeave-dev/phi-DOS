@@ -1,7 +1,7 @@
 # 打包并发布 Release。
 # 用法：GitHub 仓库页面 → Actions → Release → Run workflow，填版本号后运行。
 # 它会跑全部测试，用 tools/release.sh 打包五个平台，然后创建标签 v<版本号> 和对应的 Release，
-# 把十个 zip 作为附件挂上去。版本号会编译进程序：开机信息、VER、ILDOSVER 显示 DOS 风格的两段式，
+# 把 zip 作为附件挂上去。默认只打不带 .NET 运行时的包；勾选 with_dotnet 时另外打自带 .NET 的包。版本号会编译进程序：开机信息、VER、ILDOSVER 显示 DOS 风格的两段式，
 # 例如填 0.1.0 显示 0.10，填 5.2.10 显示 5.21。
 name: Release
 
@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: true
+      with_dotnet:
+        description: "另外打包自带 .NET 运行时的版本（体积约 30MB，附 .NET 授权文件）"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -48,7 +53,9 @@ jobs:
       - name: Package
         env:
           PHIDOS_VERSION: ${{ inputs.version }}
-        run: ./tools/release.sh
+          WITH_DOTNET: ${{ inputs.with_dotnet }}
+        run: |
+          if [ "$WITH_DOTNET" = "true" ]; then ./tools/release.sh --with-dotnet; else ./tools/release.sh; fi
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -66,13 +73,16 @@ jobs:
             |---|---|
             | Windows 64 位 | `phi-DOS-win-x64.zip` |
             | Windows 32 位 | `phi-DOS-win-x86.zip` |
-            | Windows ARM（如 Surface Pro X、骁龙笔记本） | `phi-DOS-win-arm64.zip` |
+            | Windows ARM（如骁龙笔记本） | `phi-DOS-win-arm64.zip` |
             | Linux 64 位 | `phi-DOS-linux-x64.zip` |
-            | Linux ARM64（如树莓派 4/5 的 64 位系统） | `phi-DOS-linux-arm64.zip` |
+            | Linux ARM64（如树莓派 64 位系统） | `phi-DOS-linux-arm64.zip` |
 
-            文件名带 `-small` 的是小体积版（约 1MB），需要电脑上装有 [.NET 10 运行时](https://dotnet.microsoft.com/download/dotnet/10.0)；不带的是完整版，自带运行时，解压即用。
+            这些包约 1MB，需要电脑上装有 [.NET 10 运行时](https://dotnet.microsoft.com/download/dotnet/10.0)。
+            如果有文件名以 `-with-dotnet` 结尾的包，它们自带运行时，解压即用。
 
             ## 怎么用
 
             解压后双击 `run-phidos.bat`（Linux 上运行 `./run-phidos.sh`），旁边的 `A` 文件夹会被挂成 A 盘开机。
             输入 `ILDOSVER` 看看系统信息，`EXIT` 退出，F12 重启。
+
+            授权：见包里的 `LICENSE.txt` 和 `THIRD-PARTY-NOTICES.txt`。

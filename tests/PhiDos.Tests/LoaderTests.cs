@@ -163,7 +163,7 @@ public class LoaderTests
         using var m = Boot(("LOOP.COM", ProgramCompiler.Compile(Loop)));
         m.Machine.Console.PushText("LOOP\n");
         Thread.Sleep(300);
-        m.Machine.Console.PushKey(KeyInput.CtrlC); // BREAK OFF：纯计算的循环不理 Ctrl+C，和原版一样
+        m.Machine.Console.PushKey(KeyInput.CtrlC); // BREAK OFF：纯计算的循环不理 Ctrl+C
         Thread.Sleep(300);
         Assert.False(m.Machine.Console.IsWaitingForInput);
         m.Machine.Reset();

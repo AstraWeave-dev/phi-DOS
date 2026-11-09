@@ -27,6 +27,7 @@
       run-phidos.sh    Linux / macOS：同上
       phidisk.bat      Windows：镜像工具，调用 phidos 的 phidisk 功能（Linux / macOS 上是 phidisk 脚本）
       A\              放好全部系统命令的文件夹
+      LICENSE.txt、THIRD-PARTY-NOTICES.txt   授权文件（带 .NET 运行时的包另有 dotnet-runtime-licenses 文件夹）
   -->
   <Target Name="PublishDriveA" AfterTargets="Publish">
     <!-- 去掉运行时标识等发布专用的属性，按普通类库编译这些命令，拿到 DLL 路径 -->
@@ -44,6 +45,16 @@
     <Copy SourceFiles="run-phidos.bat;phidisk.bat" DestinationFolder="$(PublishDir)" Condition="'$(_PhiUnix)' != 'true'" />
     <Copy SourceFiles="run-phidos.sh" DestinationFolder="$(PublishDir)" Condition="'$(_PhiWindows)' != 'true'" />
     <Copy SourceFiles="phidisk.sh" DestinationFiles="$(PublishDir)phidisk" Condition="'$(_PhiWindows)' != 'true'" />
+
+    <!-- 授权文件：phi-DOS 自己的协议、第三方声明（Mono.Cecil）；带 .NET 运行时的包再附上 .NET 的授权文件 -->
+    <Copy SourceFiles="..\..\LICENSE" DestinationFiles="$(PublishDir)LICENSE.txt" />
+    <Copy SourceFiles="..\..\THIRD-PARTY-NOTICES.md" DestinationFiles="$(PublishDir)THIRD-PARTY-NOTICES.txt" />
+    <ItemGroup Condition="'$(SelfContained)' == 'true'">
+      <_PhiRuntimeLicense Include="@(ResolvedRuntimePack->'%(PackageDirectory)/LICENSE.TXT')" />
+      <_PhiRuntimeLicense Include="@(ResolvedRuntimePack->'%(PackageDirectory)/THIRD-PARTY-NOTICES.TXT')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PhiRuntimeLicense)" DestinationFolder="$(PublishDir)dotnet-runtime-licenses"
+          Condition="'$(SelfContained)' == 'true' And Exists('%(_PhiRuntimeLicense.FullPath)')" />
   </Target>
 
 </Project>
