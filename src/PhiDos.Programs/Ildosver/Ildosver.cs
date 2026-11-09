@@ -11,7 +11,8 @@ namespace PhiDos.Programs;
 /// </summary>
 public sealed class Ildosver : IPhiProgram
 {
-    private const string Version = "X.XX"; // 和 PhiDosInfo.Version 保持一致
+    // 版本号在编译时生成（见 src/PhiDosVersion.props），和系统是同一个
+    private static readonly string Version = FormatVersion(PhiDos.Build.BuildVersion.Raw);
 
     // ANSI 颜色（phi-DOS 屏幕支持 ESC[...m 改颜色）
     private const string Reset = "\x1b[0m";
@@ -84,6 +85,27 @@ public sealed class Ildosver : IPhiProgram
 
         dos.Write(sb.ToString());
         return 0;
+    }
+
+    /// <summary>
+    /// 换算成 DOS 风格的两段式（0.1.0 → 0.10，5.2.10 → 5.21）。
+    /// 和 PhiDos.Core 里的 PhiDosInfo.FormatVersion 规则相同；程序引用不到 Core，所以这里放了一份。
+    /// </summary>
+    private static string FormatVersion(string raw)
+    {
+        string core = raw.Split('-', '+')[0];
+        string[] parts = core.Split('.');
+        if (parts.Length < 2) return raw;
+        foreach (string p in parts)
+        {
+            if (p.Length == 0) return raw;
+            foreach (char c in p)
+                if (c < '0' || c > '9') return raw;
+        }
+        string minor = string.Concat(parts[1..]);
+        minor = minor.Length >= 2 ? minor[..2] : minor.PadRight(2, '0');
+        string major = parts[0].TrimStart('0');
+        return (major.Length == 0 ? "0" : major) + "." + minor;
     }
 
     private static string Field(string name, string value)

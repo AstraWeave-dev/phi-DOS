@@ -3,4 +3,6 @@
     <AssemblyName>ILDOSVER</AssemblyName>
     <RootNamespace>PhiDos.Programs</RootNamespace>
   </PropertyGroup>
+  <!-- 和系统共用同一个版本号 -->
+  <Import Project="..\..\PhiDosVersion.props" />
 </Project>

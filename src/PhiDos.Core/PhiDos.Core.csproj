@@ -18,4 +18,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- 版本号：编译时用 -p:PhiDosVersion=1.2.3 传入 -->
+  <Import Project="..\PhiDosVersion.props" />
+
 </Project>

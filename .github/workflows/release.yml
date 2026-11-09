@@ -1,7 +1,8 @@
 # 打包并发布 Release。
 # 用法：GitHub 仓库页面 → Actions → Release → Run workflow，填版本号后运行。
 # 它会跑全部测试，用 tools/release.sh 打包五个平台，然后创建标签 v<版本号> 和对应的 Release，
-# 把十个 zip 作为附件挂上去。
+# 把十个 zip 作为附件挂上去。版本号会编译进程序：开机信息、VER、ILDOSVER 显示 DOS 风格的两段式，
+# 例如填 0.1.0 显示 0.10，填 5.2.10 显示 5.21。
 name: Release
 
 on:
@@ -32,10 +33,21 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Check version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+(\.[0-9]+){1,3}(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Version must look like 1.2 or 1.2.3 (got: $VERSION)"
+            exit 1
+          fi
+
       - name: Test
         run: dotnet test
 
       - name: Package
+        env:
+          PHIDOS_VERSION: ${{ inputs.version }}
         run: ./tools/release.sh
 
       - name: Create release
