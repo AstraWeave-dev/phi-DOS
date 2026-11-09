@@ -1,6 +1,6 @@
 # phi-DOS 速查
 
-详细说明见 [GODOT-INTEGRATION.md](GODOT-INTEGRATION.md)，设计见 [DESIGN.md](DESIGN.md)。
+全部功能和命令用法见 [MANUAL.md](MANUAL.md)，接入 Godot 的详细说明见 [GODOT-INTEGRATION.md](GODOT-INTEGRATION.md)，设计见 [DESIGN.md](DESIGN.md)。
 
 ## 在电脑上直接运行
 
@@ -9,7 +9,10 @@ dotnet run --project src/PhiDos.ConsoleHost                    # 临时系统盘
 dotnet run --project src/PhiDos.ConsoleHost -- story.phidisk   # 挂自己的盘
 dotnet run --project src/PhiDos.ConsoleHost -- -a story.phidisk -b ./folder
 dotnet run --project src/PhiDos.ConsoleHost -- --new story.phidisk --label STORY
+dotnet run --project src/PhiDos.ConsoleHost -- C:=D:\games:ro Z:=D:\big:unlimited
 ```
+
+镜像工具：`phidisk 文件夹 镜像` 打包，`phidisk 镜像 文件夹` 解包，`phidisk 镜像` 列出内容（源码里运行时写作 `phidos --phidisk ...`）。
 
 打包全部平台：`./tools/release.sh`（Windows 上用 `tools/release.ps1`），结果在 `publish/release/`。解压后双击 `run-phidos.bat`，旁边的 `A` 文件夹就是 A 盘。
 
