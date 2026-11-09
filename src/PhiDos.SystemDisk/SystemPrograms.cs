@@ -8,13 +8,14 @@ namespace PhiDos.SystemDisk;
 /// </summary>
 public static class SystemPrograms
 {
-    // 扩展名照 MS-DOS 2.0：FORMAT、MORE 是 .COM，SORT、FIND 是 .EXE
+    // 扩展名照 MS-DOS 2.0：FORMAT、MORE 是 .COM，SORT、FIND 是 .EXE。VI 是 phi-DOS 自己加的
     private static readonly Dictionary<string, string> Extensions = new()
     {
         ["FORMAT"] = "COM",
         ["MORE"] = "COM",
         ["SORT"] = "EXE",
         ["FIND"] = "EXE",
+        ["VI"] = "EXE",
     };
 
     private static readonly Lazy<IReadOnlyDictionary<string, byte[]>> s_files = new(LoadFiles);
