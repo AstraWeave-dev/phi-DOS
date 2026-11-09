@@ -5,7 +5,7 @@ namespace PhiDos.Core.Machine;
 /// <summary>虚拟机的配置。创建 <see cref="DosMachine"/> 时传入。</summary>
 public sealed class MachineOptions
 {
-    /// <summary>软驱数量，1 到 4，对应 A: 到 D:。默认 2（A: 和 B:）。</summary>
+    /// <summary>驱动器数量，1 到 26，对应 A: 到 Z:。默认 2（A: 和 B:），和当年双软驱的 PC 一样。</summary>
     public int DriveCount { get; init; } = 2;
 
     /// <summary>

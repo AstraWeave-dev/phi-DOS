@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PhiDos.Core\PhiDos.Core.csproj" />
     <ProjectReference Include="..\..\src\PhiDos.SystemDisk\PhiDos.SystemDisk.csproj" />
+    <ProjectReference Include="..\..\src\PhiDos.ConsoleHost\PhiDos.ConsoleHost.csproj" />
   </ItemGroup>
 
 </Project>

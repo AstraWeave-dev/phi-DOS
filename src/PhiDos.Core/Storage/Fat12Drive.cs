@@ -76,6 +76,9 @@ public sealed class Fat12Drive : IDrive, IDisposable
                     && g.ReservedSectors >= 1 && g.FatCount >= 1 && g.RootEntries > 0
                     && g.SectorsPerFat > 0 && g.TotalSectors > 0;
         if (!sane) throw new InvalidDataException("Not a FAT12 disk image: the BPB is invalid.");
+        // 和标准软盘规格一样时用它的名字（360K 之类），方便显示
+        var known = DiskGeometry.All.FirstOrDefault(k => k with { Name = "custom" } == g);
+        if (known is not null) g = known;
         _geometry = g;
         if (ClusterCount < 1 || ClusterCount >= 4085)
             throw new InvalidDataException("Not a FAT12 disk image: wrong cluster count for FAT12.");

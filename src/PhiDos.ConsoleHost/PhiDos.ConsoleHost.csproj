@@ -5,6 +5,10 @@
     <ProjectReference Include="..\PhiDos.SystemDisk\PhiDos.SystemDisk.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="PhiDos.Tests" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>phidos</AssemblyName>
@@ -21,6 +25,7 @@
     发布时额外生成（平时构建和运行不涉及这些文件）：
       run-phidos.bat   Windows：双击即可把旁边的 A 文件夹挂成 A 盘开机
       run-phidos.sh    Linux / macOS：同上
+      phidisk.bat      Windows：镜像工具，调用 phidos 的 phidisk 功能（Linux / macOS 上是 phidisk 脚本）
       A\              放好全部系统命令的文件夹
   -->
   <Target Name="PublishDriveA" AfterTargets="Publish">
@@ -31,8 +36,14 @@
       <Output TaskParameter="TargetOutputs" ItemName="_PhiProgramDll" />
     </MSBuild>
     <Copy SourceFiles="@(_PhiProgramDll)" DestinationFiles="@(_PhiProgramDll->'$(PublishDir)A\%(DosName)')" />
-    <Copy SourceFiles="run-phidos.bat" DestinationFolder="$(PublishDir)" Condition="!$(RuntimeIdentifier.StartsWith('linux')) And !$(RuntimeIdentifier.StartsWith('osx'))" />
-    <Copy SourceFiles="run-phidos.sh" DestinationFolder="$(PublishDir)" Condition="!$(RuntimeIdentifier.StartsWith('win'))" />
+    <PropertyGroup>
+      <_PhiWindows>$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win'))</_PhiWindows>
+      <_PhiUnix>$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux'))</_PhiUnix>
+      <_PhiUnix Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx'))">true</_PhiUnix>
+    </PropertyGroup>
+    <Copy SourceFiles="run-phidos.bat;phidisk.bat" DestinationFolder="$(PublishDir)" Condition="'$(_PhiUnix)' != 'true'" />
+    <Copy SourceFiles="run-phidos.sh" DestinationFolder="$(PublishDir)" Condition="'$(_PhiWindows)' != 'true'" />
+    <Copy SourceFiles="phidisk.sh" DestinationFiles="$(PublishDir)phidisk" Condition="'$(_PhiWindows)' != 'true'" />
   </Target>
 
 </Project>

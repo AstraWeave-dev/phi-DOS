@@ -26,7 +26,7 @@ for rid in "${RIDS[@]}"; do
       -p:PublishSingleFile=true -p:DebugType=none \
       -p:CopyOutputSymbolsToPublishDirectory=false -p:AllowedReferenceRelatedFileExtensions=.xml \
       -o "$OUT/$name" -v quiet -nologo
-    if [ -f "$OUT/$name/run-phidos.sh" ]; then chmod +x "$OUT/$name/run-phidos.sh" "$OUT/$name/phidos"; fi
+    if [ -f "$OUT/$name/run-phidos.sh" ]; then chmod +x "$OUT/$name/run-phidos.sh" "$OUT/$name/phidisk" "$OUT/$name/phidos"; fi
     (cd "$OUT" && zip -qr "$name.zip" "$name")
   done
 done

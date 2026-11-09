@@ -184,9 +184,14 @@ public interface IPhiProgram
 ~~~
 phidos game.phidisk                    A 盘挂虚拟磁盘
 phidos -a game.phidisk -b ./dev        A 盘挂虚拟磁盘，B 盘挂文件夹
-phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
+phidos C:=./dev:ro:1.44M Z:=./big:unlimited   任意盘符，带只读、容量选项
+phidos --new blank.phidisk             新建一张 360KB 的系统盘（--blank 为空白盘）
+phidos --phidisk 文件夹 镜像            镜像工具（发布包里的 phidisk.bat 就是它）
 ~~~
-- 参数是文件则按虚拟磁盘挂载，是文件夹则按文件夹挂载。
+- 参数是文件则按虚拟磁盘挂载，是文件夹则按文件夹挂载。盘符 A 到 Z，MachineOptions.DriveCount 最大 26。
+- 文件夹驱动器的容量可以设为不限（FolderDrive.Unlimited）：不再扫描文件夹，剩余空间显示宿主磁盘的实际剩余空间（最多 999999999 字节，保持 DIR 列宽）。
+- 镜像工具 phidisk：文件夹在前是打包，镜像在前是解包，只给镜像是列出内容。自动挑放得下的最小规格；不符合 8.3 的名字跳过并警告；保留文件时间。
+- 全部命令行用法见 docs/MANUAL.md。
 - 打包发布：tools/release.sh（Windows 上是 tools/release.ps1）一次生成 win-x86、win-x64、win-arm64、linux-x64、linux-arm64 五个平台，每个平台两种：
   - 完整版：自带 .NET 运行时，开启单文件压缩，约 30MB。
   - 小体积版：不带运行时，约 1MB，需要装有 .NET 10 运行时。
