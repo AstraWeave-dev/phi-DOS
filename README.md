@@ -11,7 +11,7 @@ phi-DOS 用 C# 按功能重新实现了 MS-DOS 2.0 的行为：8.3 文件名、�
 ```
 phi-DOS Version X.XX
 
-A>DIR
+A:\>DIR
 
  Volume in drive A has no label
  Directory of  A:\
@@ -22,7 +22,7 @@ MORE     COM     4608  11-08-26   6:29p
 SORT     EXE     6144  11-08-26   6:29p
         4 File(s)    335872 bytes free
 
-A>
+A:\>
 ```
 
 ## 功能
@@ -33,6 +33,10 @@ A>
 - 重定向 `<` `>` `>>`，管道 `|`，批处理和 AUTOEXEC.BAT。
 - 字符集为 UTF-8，支持中文文件名和中文显示。
 - 程序加载时自动注入中断检查点，死循环和无限递归都不会卡死或弄垮宿主。
+
+## 下载
+
+到 [Releases](https://github.com/AstroCanvas-dev/phi-DOS/releases) 下载对应平台的 zip，解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`）。
 
 ## 构建和运行
 
@@ -52,7 +56,7 @@ dotnet run --project src/PhiDos.ConsoleHost -- --help
 ./tools/release.ps1         # Windows PowerShell
 ```
 
-结果在 `publish/release/`。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。小体积版约 1MB，需要电脑上装有 .NET 10 运行时；完整版约 30MB，自带运行时。
+结果在 `publish/release/`。也可以在 GitHub 的 Actions 页面运行 Release 工作流，由 GitHub 打包并发布到 Releases。解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`），就会把旁边的 `A` 文件夹挂成 A 盘开机，里面放好了全部系统命令。小体积版约 1MB，需要电脑上装有 .NET 10 运行时；完整版约 30MB，自带运行时。
 
 ## 文档
 

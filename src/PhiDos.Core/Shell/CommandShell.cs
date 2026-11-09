@@ -168,12 +168,14 @@ internal sealed partial class CommandShell
     // ───────── 提示符 ─────────
 
     /// <summary>
-    /// 显示提示符。没有设置 PROMPT 时显示 "A>"；
-    /// 设置了就按 $ 元字符展开（$P 当前路径、$G 大于号、$D 日期、$T 时间 ……）。
+    /// 显示提示符。按 $ 元字符展开（$P 当前路径、$G 大于号、$D 日期、$T 时间 ……）。
+    /// 没有设置 PROMPT 时用 MachineOptions.DefaultPrompt（默认 $P$G，即 "A:\>"）；
+    /// 它也为空时和 MS-DOS 2.0 一样显示 "A>"。
     /// </summary>
     private void PrintPrompt()
     {
         string? prompt = Environment.Get("PROMPT");
+        if (string.IsNullOrEmpty(prompt)) prompt = _kernel.Machine.Options.DefaultPrompt;
         if (string.IsNullOrEmpty(prompt))
         {
             Out(_kernel.CurrentDrive + ">");
@@ -195,12 +197,8 @@ internal sealed partial class CommandShell
                 case 'T': sb.Append(DosFormat.LongTime(_kernel.Now)); break;
                 case 'D': sb.Append(DosFormat.LongDate(_kernel.Now)); break;
                 case 'P':
-                    try
-                    {
-                        sb.Append(_kernel.CurrentDrive).Append(':')
-                          .Append(_kernel.DriveOp(_kernel.CurrentDrive, false, _ => _kernel.GetCurrentDirectoryText(_kernel.CurrentDrive)));
-                    }
-                    catch (DosException) { sb.Append(_kernel.CurrentDrive).Append(':'); }
+                    // 只用记住的当前目录，不去读盘：切到没插盘的驱动器时，提示符不会弹出 Not ready 错误
+                    sb.Append(_kernel.CurrentDrive).Append(':').Append(_kernel.GetCurrentDirectoryText(_kernel.CurrentDrive));
                     break;
                 case 'V': sb.Append(PhiDosInfo.Banner); break;
                 case 'N': sb.Append(_kernel.CurrentDrive); break;

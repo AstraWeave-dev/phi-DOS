@@ -152,7 +152,7 @@ dotnet build external/phi-DOS/src/PhiDos.SystemDisk -c Release
 ```
 phi-DOS Version X.XX
 
-A>
+A:\>
 ```
 
 点一下终端让它获得焦点，就可以打字了。

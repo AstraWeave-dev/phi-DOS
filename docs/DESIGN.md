@@ -172,7 +172,7 @@ public interface IPhiProgram
   - Ctrl+C：Poll 只在 BREAK ON 时响应。BREAK OFF 时纯计算的死循环不理 Ctrl+C，只能重启，这和原版一致。
   - 无限递归：Poll 会检查剩余栈空间，栈快用完时抛出可以捕获的异常，不会让整个游戏因栈溢出崩溃。
 - 被放弃的线程：.NET 10 不支持强制终止线程。重启时旧线程会收到 MachineHaltException；如果程序把异常吞掉继续运行，超过 16 次后线程会在 Poll 里永久睡眠，不再占用 CPU。
-- 提示符：默认 "A>"，支持 PROMPT 及 $T $D $P $V $N $G $L $B $Q $H $E $_ $$ 元字符。
+- 提示符：没有设置 PROMPT 时用 MachineOptions.DefaultPrompt，默认 "$P$G"（显示 "A:\>"，这是 MS-DOS 6.0 起的默认值；2.0 原版是 "A>"，把 DefaultPrompt 设为空字符串即可恢复）。$P 只用记住的当前目录，不读盘，切到没插盘的驱动器时不会弹出错误。支持 PROMPT 及 $T $D $P $V $N $G $L $B $Q $H $E $_ $$ 元字符。
 - 重定向：< > >>。照原版，> 前面的空格会留在命令里（ECHO hi > X 写入 "hi "）。双引号里的 < > | 不当作重定向，方便 FIND "a|b"（这一点比原版宽松）。
 - 管道：照 2.0，前一个命令的输出写进当前驱动器根目录的临时文件 %PIPE1.$$$、%PIPE2.$$$，后一个命令从中读取，用完删除。所以 DIR | SORT 的结果里会看到这个临时文件，和原版一样。
 - 批处理：%0 到 %9、%%、%名字%（环境变量）、ECHO、GOTO（标号只比较前 8 个字符）、IF [NOT] ERRORLEVEL / EXIST / ==、FOR %%v IN (...) DO（不能嵌套）、SHIFT、PAUSE、REM。

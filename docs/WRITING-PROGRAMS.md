@@ -58,7 +58,7 @@ dotnet build samples/Hello -p:PhiDosDrive=C:\Users\你\Downloads\phi-DOS-win-x64
 然后双击 `run-phidos.bat`，在 DOS 里输入：
 
 ```
-A>HELLO one two
+A:\>HELLO one two
 Hello from an IL program!
 You gave 2 argument(s): one, two
 What is your name? Astro
@@ -400,7 +400,7 @@ public class Upper : IPhiProgram
 ```
 
 ```
-A>TYPE README.TXT | UPPER | MORE
+A:\>TYPE README.TXT | UPPER | MORE
 ```
 
 直接从键盘运行时，`Read(0, ...)` 一次读到用户输入的一整行，用户按 Ctrl+Z 再回车表示输入结束。
