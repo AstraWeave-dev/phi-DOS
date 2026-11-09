@@ -203,8 +203,11 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 
 里程碑完成后在标题前标 ✅，对应的提交标题以 "M0："、"M1：" 这样的前缀开头。（远端仓库不接受推送 Git 标签，所以不打标签。）
 
-外部命令范围：FORMAT（只对虚拟磁盘生效，支持 /V）、MORE、SORT（/R、/+n）、FIND（/V、/C、/N），以及 phi-DOS 自己加的 VI。CHKDSK 不提供，输入后报 "Bad command or file name"。
+外部命令范围：FORMAT（只对虚拟磁盘生效，支持 /V）、MORE、SORT（/R、/+n）、FIND（/V、/C、/N），以及 phi-DOS 自己加的 VI 和 ILDOSVER。CHKDSK 不提供，输入后报 "Bad command or file name"。
 终端版在没有指定 A 盘时，自动给 A 盘一张内存中的临时系统盘（带上述命令）。
+
+### ILDOSVER（phi-DOS 自己加的系统信息展示）
+类似 neofetch：左边是彩色的 φ 图标，右边列出系统信息（OS 写 phi-DOS、CPU 写 .NET、语言写 IL 等，系统名和版本号直接写在程序里），最后是 16 色色板。当前驱动器的信息通过 GetDiskInfo 读取，环境变量 USER 决定标题里的用户名，没有时显示 guest。
 
 ### VI（phi-DOS 自己加的全屏编辑器）
 DOS 2.0 没有全屏编辑器，原版只有 EDLIN。VI 模仿 vi 的手感，只做常用部分，不追求兼容：

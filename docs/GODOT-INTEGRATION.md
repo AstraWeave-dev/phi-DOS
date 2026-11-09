@@ -54,7 +54,7 @@
 |---|---|---|
 | PhiDos.Abi | IDos、IPhiProgram 等公共接口 | 间接引用（Core 依赖它） |
 | PhiDos.Core | 虚拟机、内核、COMMAND、驱动器 | 要 |
-| PhiDos.SystemDisk | 内置 FORMAT、MORE、SORT、FIND、VI，新建系统盘 | 需要系统盘时引用 |
+| PhiDos.SystemDisk | 内置 FORMAT、MORE、SORT、FIND、VI、ILDOSVER，新建系统盘 | 需要系统盘时引用 |
 | Mono.Cecil | 加载程序时改写 IL | 由 Core 自动带入 |
 
 ## 2. 环境要求
