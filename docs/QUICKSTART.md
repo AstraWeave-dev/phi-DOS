@@ -11,7 +11,7 @@ dotnet run --project src/PhiDos.ConsoleHost -- -a story.phidisk -b ./folder
 dotnet run --project src/PhiDos.ConsoleHost -- --new story.phidisk --label STORY
 ```
 
-发布 Windows 单文件：`dotnet publish src/PhiDos.ConsoleHost -p:PublishProfile=win-x64`，结果在 `publish/win-x64/phidos.exe`。
+打包全部平台：`./tools/release.sh`（Windows 上用 `tools/release.ps1`），结果在 `publish/release/`。解压后双击 `run-phidos.bat`，旁边的 `A` 文件夹就是 A 盘。
 
 终端里 F12 重启，EXIT 退出。
 
@@ -110,7 +110,7 @@ public class Hello : IPhiProgram
 }
 ```
 
-编译出的 `HELLO.dll` 改名为 `HELLO.COM` 放到盘上。程序里不能直接用 File、Console、Thread、Task、Environment.Exit 这类 API，否则会显示 "Error in EXE file"。
+编译出的 `HELLO.dll` 改名为 `HELLO.COM` 放到盘上。仓库里的 `samples/Hello` 可以用 `dotnet build samples/Hello -p:PhiDosDrive=A文件夹路径` 一步编译并放好。完整说明见 [WRITING-PROGRAMS.md](WRITING-PROGRAMS.md)。程序里不能直接用 File、Console、Thread、Task、Environment.Exit 这类 API，否则会显示 "Error in EXE file"。
 
 ## 线程三条规则
 

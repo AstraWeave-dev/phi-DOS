@@ -41,6 +41,9 @@ phi-DOS 是一个用 C# 实现的、行为仿照 MS-DOS 2.0 的磁盘操作系�
 - PhiDos.SystemDisk：把上面这些命令作为资源打包，提供"新建系统盘"的功能。宿主引用它。
 - PhiDos.ConsoleHost：终端版宿主，即开发期的独立应用（可执行文件名 phidos）。
 - PhiDos.Tests：单元测试（xUnit），用 Roslyn 现场编译测试程序。
+- samples/Hello：程序示例，`-p:PhiDosDrive=文件夹` 编译后自动放进那个文件夹。编写程序的完整说明见 docs/WRITING-PROGRAMS.md。
+- tools/：打包发布脚本。
+- 系统命令清单在 src/PhiDos.Programs/SystemPrograms.props，SystemDisk 和 ConsoleHost 共用。
 - Godot 宿主由使用者按 docs 里的接入文档自行接入。Core 层不得引用 Godot。
 
 ## 虚拟机（DosMachine）
@@ -184,9 +187,12 @@ phidos -a game.phidisk -b ./dev        A 盘挂虚拟磁盘，B 盘挂文件夹
 phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 ~~~
 - 参数是文件则按虚拟磁盘挂载，是文件夹则按文件夹挂载。
-- 发布为单个可执行文件，无需另装 .NET 即可运行：
-  `dotnet publish src/PhiDos.ConsoleHost -p:PublishProfile=win-x64`，结果在 publish/win-x64/phidos.exe。
-  另有 linux-x64、osx-arm64 两个配置。不能开启裁剪（PublishTrimmed），磁盘上的程序可能用到 .NET 库里的任何东西。
+- 打包发布：tools/release.sh（Windows 上是 tools/release.ps1）一次生成 win-x86、win-x64、win-arm64、linux-x64、linux-arm64 五个平台，每个平台两种：
+  - 完整版：自带 .NET 运行时，开启单文件压缩，约 30MB。
+  - 小体积版：不带运行时，约 1MB，需要装有 .NET 10 运行时。
+  32 位的 win-arm 从 .NET 7 起已不受支持，所以没有。不能开启裁剪（PublishTrimmed），磁盘上的程序可能用到 .NET 库里的任何东西。
+- 发布目录的结构：phidos(.exe)、run-phidos.bat（Linux 包是 run-phidos.sh）、A 文件夹（放好全部系统命令）。双击 bat 就会把 A 文件夹挂成 A 盘开机。bat 和 A 文件夹只在发布时生成，平时构建不涉及。
+- 也保留了单个平台的发布配置：`dotnet publish src/PhiDos.ConsoleHost -p:PublishProfile=win-x64`（另有 win-x64-small、linux-x64、osx-arm64）。
 - 终端里按 F12 重启虚拟机，在最外层输入 EXIT 退出。标准输入可以重定向为脚本文件，读完后自动关机。
 - 设置环境变量 PHIDOS_TRACE=1 时，内部错误会显示完整调用栈。
 - Godot 宿主完成后，同样可导出为独立应用。
@@ -203,8 +209,11 @@ phidos --new blank.phidisk             新建一张空白的 360KB 虚拟磁盘
 
 里程碑完成后在标题前标 ✅，对应的提交标题以 "M0："、"M1：" 这样的前缀开头。（远端仓库不接受推送 Git 标签，所以不打标签。）
 
-外部命令范围：FORMAT（只对虚拟磁盘生效，支持 /V）、MORE、SORT（/R、/+n）、FIND（/V、/C、/N），以及 phi-DOS 自己加的 VI。CHKDSK 不提供，输入后报 "Bad command or file name"。
+外部命令范围：FORMAT（只对虚拟磁盘生效，支持 /V）、MORE、SORT（/R、/+n）、FIND（/V、/C、/N），以及 phi-DOS 自己加的 VI 和 ILDOSVER。CHKDSK 不提供，输入后报 "Bad command or file name"。
 终端版在没有指定 A 盘时，自动给 A 盘一张内存中的临时系统盘（带上述命令）。
+
+### ILDOSVER（phi-DOS 自己加的系统信息展示）
+类似 neofetch：左边是彩色的 φ 图标，右边列出系统信息（OS 写 phi-DOS、CPU 写 .NET、语言写 IL 等，系统名和版本号直接写在程序里），最后是 16 色色板。当前驱动器的信息通过 GetDiskInfo 读取，环境变量 USER 决定标题里的用户名，没有时显示 guest。
 
 ### VI（phi-DOS 自己加的全屏编辑器）
 DOS 2.0 没有全屏编辑器，原版只有 EDLIN。VI 模仿 vi 的手感，只做常用部分，不追求兼容：

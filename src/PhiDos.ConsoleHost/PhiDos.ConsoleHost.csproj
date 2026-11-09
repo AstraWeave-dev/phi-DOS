@@ -14,4 +14,25 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- 系统命令清单 -->
+  <Import Project="..\PhiDos.Programs\SystemPrograms.props" />
+
+  <!--
+    发布时额外生成（平时构建和运行不涉及这些文件）：
+      run-phidos.bat   Windows：双击即可把旁边的 A 文件夹挂成 A 盘开机
+      run-phidos.sh    Linux / macOS：同上
+      A\              放好全部系统命令的文件夹
+  -->
+  <Target Name="PublishDriveA" AfterTargets="Publish">
+    <!-- 去掉运行时标识等发布专用的属性，按普通类库编译这些命令，拿到 DLL 路径 -->
+    <MSBuild Projects="@(PhiProgramProject)" Targets="Build"
+             Properties="Configuration=$(Configuration)"
+             RemoveProperties="RuntimeIdentifier;SelfContained;PublishSingleFile;PublishDir;PublishProfile">
+      <Output TaskParameter="TargetOutputs" ItemName="_PhiProgramDll" />
+    </MSBuild>
+    <Copy SourceFiles="@(_PhiProgramDll)" DestinationFiles="@(_PhiProgramDll->'$(PublishDir)A\%(DosName)')" />
+    <Copy SourceFiles="run-phidos.bat" DestinationFolder="$(PublishDir)" Condition="!$(RuntimeIdentifier.StartsWith('linux')) And !$(RuntimeIdentifier.StartsWith('osx'))" />
+    <Copy SourceFiles="run-phidos.sh" DestinationFolder="$(PublishDir)" Condition="!$(RuntimeIdentifier.StartsWith('win'))" />
+  </Target>
+
 </Project>

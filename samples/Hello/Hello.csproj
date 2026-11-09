@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    一个最小的 phi-DOS 程序示例。详细说明见 docs/WRITING-PROGRAMS.md。
+
+    编译：            dotnet build samples/Hello
+    编译并放进 A 盘：  dotnet build samples/Hello -p:PhiDosDrive=C:\path\to\phi-DOS\A
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- 程序集名就是盘上的主文件名 -->
+    <AssemblyName>HELLO</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- 不生成 .pdb，盘上只需要 DLL 本身 -->
+    <DebugType>none</DebugType>
+    <!-- 放到盘上时用的文件名，.COM 或 .EXE 都可以 -->
+    <DosName>HELLO.COM</DosName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false：不复制 PhiDos.Abi.dll，运行时由系统提供 -->
+    <ProjectReference Include="..\..\src\PhiDos.Abi\PhiDos.Abi.csproj" Private="false" />
+  </ItemGroup>
+
+  <!-- 指定了 PhiDosDrive 时，编译完把 DLL 改名拷进那个文件夹（它挂成 DOS 的驱动器后就能直接运行） -->
+  <Target Name="CopyToPhiDosDrive" AfterTargets="Build" Condition="'$(PhiDosDrive)' != ''">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(PhiDosDrive)\$(DosName)" />
+    <Message Importance="high" Text="phi-DOS: copied to $(PhiDosDrive)\$(DosName)" />
+  </Target>
+
+</Project>

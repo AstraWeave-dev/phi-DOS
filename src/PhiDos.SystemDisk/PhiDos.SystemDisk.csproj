@@ -11,13 +11,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PhiProgramProject Include="..\PhiDos.Programs\Format\Format.csproj" />
-    <PhiProgramProject Include="..\PhiDos.Programs\More\More.csproj" />
-    <PhiProgramProject Include="..\PhiDos.Programs\Sort\Sort.csproj" />
-    <PhiProgramProject Include="..\PhiDos.Programs\Find\Find.csproj" />
-    <PhiProgramProject Include="..\PhiDos.Programs\Vi\Vi.csproj" />
-  </ItemGroup>
+  <!-- 系统命令清单 -->
+  <Import Project="..\PhiDos.Programs\SystemPrograms.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\PhiDos.Core\PhiDos.Core.csproj" />
@@ -26,7 +21,7 @@
   </ItemGroup>
 
   <!--
-    构建一开始就问出每个命令编译后的 DLL 路径，作为嵌入资源加进来，资源名形如 programs/FORMAT。
+    构建一开始就问出每个命令编译后的 DLL 路径，作为嵌入资源加进来，资源名形如 programs/FORMAT.COM。
     这时 DLL 可能还没生成，不要紧：上面的项目引用保证它们在编译本项目之前就会编译好。
   -->
   <Target Name="EmbedPhiPrograms" BeforeTargets="BeforeBuild">
@@ -34,9 +29,9 @@
       <Output TaskParameter="TargetOutputs" ItemName="PhiProgramDll" />
     </MSBuild>
     <ItemGroup>
-      <EmbeddedResource Include="@(PhiProgramDll)" LogicalName="programs/%(Filename)" />
+      <EmbeddedResource Include="@(PhiProgramDll)" LogicalName="programs/%(PhiProgramDll.DosName)" />
     </ItemGroup>
-    <Message Importance="high" Text="phi-DOS system programs: @(PhiProgramDll->'%(Filename)')" />
+    <Message Importance="high" Text="phi-DOS system programs: @(PhiProgramDll->'%(DosName)')" />
   </Target>
 
 </Project>

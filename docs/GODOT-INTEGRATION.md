@@ -54,7 +54,7 @@
 |---|---|---|
 | PhiDos.Abi | IDos、IPhiProgram 等公共接口 | 间接引用（Core 依赖它） |
 | PhiDos.Core | 虚拟机、内核、COMMAND、驱动器 | 要 |
-| PhiDos.SystemDisk | 内置 FORMAT、MORE、SORT、FIND、VI，新建系统盘 | 需要系统盘时引用 |
+| PhiDos.SystemDisk | 内置 FORMAT、MORE、SORT、FIND、VI、ILDOSVER，新建系统盘 | 需要系统盘时引用 |
 | Mono.Cecil | 加载程序时改写 IL | 由 Core 自动带入 |
 
 ## 2. 环境要求
@@ -407,6 +407,8 @@ UnlockCommand.Unlocked += who => GetNode<DialogBox>("Dialog").Show($"{who} 解�
 **游戏暂停时**虚拟机还在跑。通常没关系，因为 DOS 大部分时间都在等按键，不占 CPU。如果需要彻底暂停，可以先 `ExportImage` 存下盘，`Stop()`，恢复时重新挂盘并 `Start()`（屏幕内容会重新开机）。
 
 ## 11. 编写自己的 .COM 程序
+
+更完整的说明（文件读写、管道、颜色和全屏界面、调试方法）见 [WRITING-PROGRAMS.md](WRITING-PROGRAMS.md)，这一节只是概要。
 
 ### 11.1 新建项目
 
