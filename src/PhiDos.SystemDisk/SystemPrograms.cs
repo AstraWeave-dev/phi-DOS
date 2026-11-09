@@ -8,17 +8,6 @@ namespace PhiDos.SystemDisk;
 /// </summary>
 public static class SystemPrograms
 {
-    // 扩展名照 MS-DOS 2.0：FORMAT、MORE 是 .COM，SORT、FIND 是 .EXE。VI、ILDOSVER 是 phi-DOS 自己加的
-    private static readonly Dictionary<string, string> Extensions = new()
-    {
-        ["FORMAT"] = "COM",
-        ["MORE"] = "COM",
-        ["SORT"] = "EXE",
-        ["FIND"] = "EXE",
-        ["VI"] = "EXE",
-        ["ILDOSVER"] = "COM",
-    };
-
     private static readonly Lazy<IReadOnlyDictionary<string, byte[]>> s_files = new(LoadFiles);
 
     /// <summary>文件名（如 "FORMAT.COM"）到文件内容（IL 程序集）的映射。</summary>
@@ -31,11 +20,12 @@ public static class SystemPrograms
         foreach (string resource in asm.GetManifestResourceNames())
         {
             if (!resource.StartsWith("programs/", StringComparison.Ordinal)) continue;
+            // 资源名形如 programs/FORMAT.COM，文件名在 src/PhiDos.Programs/SystemPrograms.props 里定义
             string name = resource["programs/".Length..].ToUpperInvariant();
             using var stream = asm.GetManifestResourceStream(resource)!;
             using var ms = new MemoryStream();
             stream.CopyTo(ms);
-            result[name + "." + Extensions.GetValueOrDefault(name, "COM")] = ms.ToArray();
+            result[name] = ms.ToArray();
         }
         return result;
     }

@@ -1,0 +1,14 @@
+<!--
+  系统自带的外部命令清单。PhiDos.SystemDisk（打包进系统盘）和 PhiDos.ConsoleHost（发布时生成 A 文件夹）都导入它。
+  DosName 是程序放到盘上时用的文件名。新增系统命令时只需要在这里加一行。
+-->
+<Project>
+  <ItemGroup>
+    <PhiProgramProject Include="$(MSBuildThisFileDirectory)Format\Format.csproj" DosName="FORMAT.COM" />
+    <PhiProgramProject Include="$(MSBuildThisFileDirectory)More\More.csproj" DosName="MORE.COM" />
+    <PhiProgramProject Include="$(MSBuildThisFileDirectory)Sort\Sort.csproj" DosName="SORT.EXE" />
+    <PhiProgramProject Include="$(MSBuildThisFileDirectory)Find\Find.csproj" DosName="FIND.EXE" />
+    <PhiProgramProject Include="$(MSBuildThisFileDirectory)Vi\Vi.csproj" DosName="VI.EXE" />
+    <PhiProgramProject Include="$(MSBuildThisFileDirectory)Ildosver\Ildosver.csproj" DosName="ILDOSVER.COM" />
+  </ItemGroup>
+</Project>
