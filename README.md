@@ -90,4 +90,7 @@ docs/                   文档与 Godot 示例
 
 本项目以 MIT 协议发布，见 LICENSE。
 
-phi-DOS 是独立编写的软件，不包含其他操作系统的代码。用到的第三方组件及其授权见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+phi-DOS 在设计时参考了微软以 MIT 协议开源的 [MS-DOS 源码](https://github.com/microsoft/MS-DOS)，部分提示文字取自其中。
+phi-DOS 本身是用 C# 独立编写的，没有包含或翻译 MS-DOS 的代码。MS-DOS 的授权声明和其他第三方组件的授权见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+
+MS-DOS 是 Microsoft Corporation 的注册商标。phi-DOS 与微软没有关联，也没有得到微软的赞助或认可。

@@ -32,7 +32,7 @@
 
 ## 1. phi-DOS 是什么
 
-phi-DOS 是一个用 C# 独立编写的 DOS 风格操作系统模拟软件。它在操作上模仿经典 DOS 命令行，命令、输出格式、提示文字都是 DOS 用户熟悉的样子；内部实现和 DOS 完全不同，不包含其他操作系统的代码。和经典 DOS 最大的不同有两点：
+phi-DOS 是一个用 C# 独立编写的 DOS 风格操作系统模拟软件。它在操作上模仿经典 DOS 命令行，命令、输出格式、提示文字都是 DOS 用户熟悉的样子；内部实现和 DOS 完全不同。和经典 DOS 最大的不同有两点：
 
 - 磁盘上的 .COM / .EXE 程序是 .NET 程序集（IL），不是 x86 机器码。
 - 文字一律用 UTF-8，可以显示和输入中文，文件名里也能用中文。
@@ -1029,3 +1029,9 @@ phi-DOS 在操作上尽量接近经典 DOS，下面是有意不同的地方：
 | 没有实现 | — | CTTY、FCB 方式的文件调用、CHKDSK、EDLIN、DEBUG、DISKCOPY、SYS 等外部命令 |
 | COMMAND.COM | 盘上的文件 | 内置，盘上不需要这个文件 |
 | Ctrl+C | 纯计算的循环无法打断 | 同样无法打断，但 BREAK ON 时可以；宿主的重启总能打断 |
+
+## 来源与授权
+
+phi-DOS 在设计时参考了微软以 MIT 协议开源的 [MS-DOS 源码](https://github.com/microsoft/MS-DOS)，部分提示文字取自其中。phi-DOS 本身是用 C# 独立编写的，没有包含或翻译 MS-DOS 的代码。授权声明见仓库根目录的 [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md)，发布包里是 `THIRD-PARTY-NOTICES.txt`。
+
+MS-DOS 是 Microsoft Corporation 的注册商标。phi-DOS 与微软没有关联，也没有得到微软的赞助或认可。

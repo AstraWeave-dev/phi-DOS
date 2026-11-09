@@ -236,9 +236,9 @@ VI 模仿 vi 编辑器的手感，只做常用部分，不追求兼容：
 对照经典 DOS 的实际表现：执行同样的操作，比对输出（列宽、日期格式、错误提示）。差异即 bug。镜像格式用 mtools 交叉检查。
 
 ## 授权与命名
-- phi-DOS 是独立编写的软件，以 MIT 协议发布。它只在操作上模仿经典 DOS 命令行，不包含其他操作系统的代码。
-- 代码、程序输出和文档里不使用其他公司的产品名或商标，只用 "DOS"、"经典 DOS" 这类通用说法。
-- 第三方组件（Mono.Cecil）的授权声明在 THIRD-PARTY-NOTICES.md。发布包里附带 LICENSE.txt 和 THIRD-PARTY-NOTICES.txt；自带 .NET 运行时的包另附 .NET 的授权文件（dotnet-runtime-licenses 文件夹）。
+- phi-DOS 以 MIT 协议发布。设计时参考了微软以 MIT 协议开源的 MS-DOS 源码（github.com/microsoft/MS-DOS），部分提示文字取自其中；程序本身用 C# 独立编写，没有包含或翻译它的代码。
+- MS-DOS 的授权声明和第三方组件（Mono.Cecil）的授权声明都在 THIRD-PARTY-NOTICES.md。
+- 系统名为 phi-DOS。代码和程序输出里不使用 MS-DOS 这个名字（ILDOSVER 不写基于什么）；README 和手册里在说明来源时提到它，并注明 MS-DOS 是 Microsoft Corporation 的注册商标、phi-DOS 与微软没有关联。发布包里附带 LICENSE.txt 和 THIRD-PARTY-NOTICES.txt；自带 .NET 运行时的包另附 .NET 的授权文件（dotnet-runtime-licenses 文件夹）。
 
 ## 协作规则（给 Claude Code）
 - 每次只做一个里程碑或一个模块，开始前先说明计划。

@@ -95,5 +95,8 @@ docs/                   documentation and Godot samples
 
 MIT, see LICENSE.
 
-phi-DOS is independently written software and contains no code from any other operating system.
+phi-DOS was designed with reference to Microsoft's [MS-DOS source code](https://github.com/microsoft/MS-DOS), released under the MIT licence, and some of its messages are taken from it.
+phi-DOS itself is written independently in C# and does not contain or translate the MS-DOS code. The MS-DOS licence notice and the licences of other third-party components are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+MS-DOS is a registered trademark of Microsoft Corporation. phi-DOS is not affiliated with, sponsored by or endorsed by Microsoft.
 Third-party components and their licences are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

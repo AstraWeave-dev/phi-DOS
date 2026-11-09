@@ -32,7 +32,7 @@ Contents
 
 ## 1. What phi-DOS is
 
-phi-DOS is an independently written, DOS-style operating system simulator in C#. It works like a classic DOS command line, with the commands, output formats and messages DOS users know; inside it is entirely different and contains no code from any other operating system. The two big differences from classic DOS are:
+phi-DOS is an independently written, DOS-style operating system simulator in C#. It works like a classic DOS command line, with the commands, output formats and messages DOS users know; inside it is entirely different. The two big differences from classic DOS are:
 
 - .COM / .EXE programs on disk are .NET assemblies (IL), not x86 machine code.
 - All text is UTF-8, so Chinese and other scripts can be displayed, typed and used in file names.
@@ -1029,3 +1029,9 @@ phi-DOS works as much like classic DOS as it can. These differences are delibera
 | Not implemented | — | CTTY, FCB file calls, and the external commands CHKDSK, EDLIN, DEBUG, DISKCOPY, SYS etc. |
 | COMMAND.COM | a file on disk | built in; no file needed |
 | Ctrl+C | cannot stop a pure computing loop | same, unless BREAK ON; the host's reset always stops it |
+
+## Origins and licences
+
+phi-DOS was designed with reference to Microsoft's [MS-DOS source code](https://github.com/microsoft/MS-DOS), released under the MIT licence, and some of its messages are taken from it. phi-DOS itself is written independently in C# and does not contain or translate the MS-DOS code. The licence notices are in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md) in the repository, and in `THIRD-PARTY-NOTICES.txt` in the release packages.
+
+MS-DOS is a registered trademark of Microsoft Corporation. phi-DOS is not affiliated with, sponsored by or endorsed by Microsoft.
