@@ -19,6 +19,12 @@ public sealed class MachineOptions
     /// </summary>
     public bool ExitPowersOff { get; init; }
 
+    /// <summary>
+    /// 没有设置 PROMPT 环境变量时使用的提示符。默认 "$P$G"，显示为 "A:\>"、"A:\GAMES>"（MS-DOS 6.0 起的默认值）。
+    /// 设为空字符串则和 MS-DOS 2.0 一样只显示 "A>"。
+    /// </summary>
+    public string DefaultPrompt { get; init; } = "$P$G";
+
     /// <summary>宿主的时钟，默认是电脑的本地时间。测试时可以换成固定时间。</summary>
     public Func<DateTime> Clock { get; init; } = () => DateTime.Now;
 

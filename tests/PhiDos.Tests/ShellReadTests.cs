@@ -204,7 +204,7 @@ public class ShellReadTests
     {
         using var m = new TestMachine(
             mm => mm.MountImage('A', SampleDisk()),
-            new MachineOptions { Clock = () => T });
+            new MachineOptions { Clock = () => T, DefaultPrompt = "" });
         Assert.Equal(
             "phi-DOS Version X.XX\r\n\r\nCurrent date is Thu 10-20-1983\r\nEnter new date: ",
             m.BootOutput);

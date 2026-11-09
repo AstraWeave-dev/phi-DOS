@@ -1,4 +1,5 @@
 using PhiDos.Core;
+using PhiDos.Core.Machine;
 
 namespace PhiDos.Tests;
 
@@ -29,6 +30,31 @@ public class BootTests
         m.Machine.Console.PushText("EXIT\n");
         Assert.True(m.Machine.WaitForExit(TimeSpan.FromSeconds(5)));
         Assert.Equal(Core.Machine.MachineState.Stopped, m.Machine.State);
+    }
+
+    [Fact]
+    public void DefaultPrompt_ShowsDriveAndDirectory()
+    {
+        using var m = new TestMachine(
+            mm => mm.MountImage('A', ShellReadTests.SampleDisk()),
+            new MachineOptions { PromptForDateTimeAtBoot = false, Clock = () => TestMachine.FixedTime });
+        Assert.EndsWith("\r\n\r\nA:\\>", m.BootOutput);
+        m.Run("CD GAMES");
+        Assert.Equal("\nA:\\GAMES>", m.Run("REM"));
+        // 切到没插盘的 B: 时提示符不会去读盘，所以不会弹出 Not ready
+        Assert.Equal("\nB:\\>", m.Run("B:"));
+        // 自己设置的 PROMPT 优先；清空后回到默认值
+        m.Run("PROMPT $N$G");
+        Assert.Equal("\nB>", m.Run("REM"));
+        m.Run("PROMPT");
+        Assert.Equal("\nB:\\>", m.Run("REM"));
+    }
+
+    [Fact]
+    public void EmptyDefaultPrompt_IsMsDos20Style()
+    {
+        using var m = new TestMachine(options: new() { PromptForDateTimeAtBoot = false, DefaultPrompt = "" });
+        Assert.EndsWith("\r\n\r\nA>", m.BootOutput);
     }
 
     [Fact]

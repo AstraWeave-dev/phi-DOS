@@ -56,6 +56,7 @@ public class ProgramSearchTests
         {
             PromptForDateTimeAtBoot = false,
             Clock = () => TestMachine.FixedTime,
+            DefaultPrompt = "",
             BuiltinPrograms = new Dictionary<string, Func<IPhiProgram>>(StringComparer.OrdinalIgnoreCase)
             {
                 ["HELLO"] = () => new Hello(),

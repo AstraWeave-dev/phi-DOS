@@ -201,7 +201,7 @@ public class BatchTests
     {
         using var m = new TestMachine(
             mm => mm.MountImage('A', Disk(("AUTOEXEC.BAT", "ECHO OFF\nPROMPT $p$g\nECHO Welcome!\n"))),
-            new MachineOptions { Clock = () => T });
+            new MachineOptions { Clock = () => T, DefaultPrompt = "" });
         Assert.Equal("phi-DOS Version X.XX\r\n\r\nA>ECHO OFF\r\nWelcome!\r\n\r\nA:\\>", m.BootOutput);
     }
 

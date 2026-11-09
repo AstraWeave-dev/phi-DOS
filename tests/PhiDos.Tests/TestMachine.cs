@@ -16,6 +16,7 @@ internal sealed class TestMachine : IDisposable
         {
             PromptForDateTimeAtBoot = false,
             Clock = () => FixedTime,
+            DefaultPrompt = "", // 大部分测试按 2.0 的 "A>" 写期望值；默认提示符另有专门的测试
         });
         setup?.Invoke(Machine);
         if (start) Boot();
