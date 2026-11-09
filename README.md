@@ -29,7 +29,7 @@ A>
 
 - 虚拟磁盘 .phidisk：标准 FAT12 镜像，可读写，改名为 .img 后 DOSBox、mtools 都能打开。也可以把电脑上的文件夹挂成驱动器。
 - 内置命令：DIR、CD、MD、RD、COPY、DEL、REN、TYPE、DATE、TIME、VER、VOL、CLS、PAUSE、REM、SET、PATH、PROMPT、BREAK、VERIFY、ECHO、IF、GOTO、FOR、SHIFT、EXIT。
-- 外部命令：FORMAT、MORE、SORT、FIND。
+- 外部命令：FORMAT、MORE、SORT、FIND，以及一个模仿 vi 手感的全屏编辑器 VI。
 - 重定向 `<` `>` `>>`，管道 `|`，批处理和 AUTOEXEC.BAT。
 - 字符集为 UTF-8，支持中文文件名和中文显示。
 - 程序加载时自动注入中断检查点，死循环和无限递归都不会卡死或弄垮宿主。

@@ -16,6 +16,7 @@
     <PhiProgramProject Include="..\PhiDos.Programs\More\More.csproj" />
     <PhiProgramProject Include="..\PhiDos.Programs\Sort\Sort.csproj" />
     <PhiProgramProject Include="..\PhiDos.Programs\Find\Find.csproj" />
+    <PhiProgramProject Include="..\PhiDos.Programs\Vi\Vi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
