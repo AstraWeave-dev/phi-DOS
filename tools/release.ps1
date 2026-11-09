@@ -1,7 +1,7 @@
 # 打包发布终端版（Windows PowerShell 版，和 release.sh 做同样的事）。结果在 publish/release/ 下。
 #   phi-DOS-<平台>.zip        完整版，自带 .NET 运行时
 #   phi-DOS-<平台>-small.zip  小体积版，需要电脑上装有 .NET 10 运行时
-# 注意：Compress-Archive 不会保留 Linux 的可执行权限，Linux 包解压后要 chmod +x phidos run-phidos.sh。
+# 注意：Compress-Archive 不会保留 Linux 的可执行权限，Linux 包解压后要 chmod +x phidos run-phidos.sh phidisk。
 $ErrorActionPreference = 'Stop'
 Set-Location (Join-Path $PSScriptRoot '..')
 

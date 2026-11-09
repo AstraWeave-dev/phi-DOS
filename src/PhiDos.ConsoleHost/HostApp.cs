@@ -10,85 +10,75 @@ internal static class HostApp
         phi-DOS terminal host
 
         Usage:
-          phidos [disk]                          Mount disk on A: and boot
-          phidos -a <disk> [-b <disk>] ...       Mount disks on A: to D:
+          phidos [options] [disk ...]
           phidos --new <file> [--size 360K] [--label NAME] [--blank]
-                                                 Create a new .phidisk and exit
+          phidos --phidisk <arguments>        (same as the phidisk tool, see phidisk --help)
 
-        A disk is either a .phidisk file (standard FAT12 image) or a folder.
-        If nothing is mounted on A:, it gets a temporary in-memory system disk
-        (with FORMAT, MORE, SORT and FIND). Changes to it are lost on exit.
+        Mounting drives (A disk is a .phidisk file, i.e. a FAT12 image, or a folder):
+          phidos disk1 disk2 ...               Mount in order on A:, B:, C: ...
+          phidos -a <disk> -b <disk> ...       Mount on A: to D:
+          phidos X:=<disk>[:options]           Mount on any drive A: to Z:
+            options (append with colons, e.g. C:=D:\games:ro:1.44M):
+              ro          write-protected
+              rw          writable (default)
+              360K, 1.44M, 10M, 1G ...
+                          capacity of a folder drive (default 360K)
+              unlimited   folder drive without a capacity limit
+
+          If nothing is mounted on A:, it gets a temporary in-memory system disk
+          (with FORMAT, MORE, SORT, FIND, VI, ILDOSVER). Changes to it are lost on exit.
 
         Options:
-          -r, --readonly        Mount the following disks write-protected
+          -r, --readonly        Mount all following disks write-protected
           --no-date             Do not ask for date and time at boot
           -h, --help            Show this help
 
+        Creating a disk:
+          --new <file>          Create a new .phidisk with the system programs and exit
+          --size <size>         160K, 180K, 320K, 360K (default), 720K, 1.2M, 1.44M
+          --label <name>        Volume label
+          --blank               Leave the new disk empty
+
         Keys: F12 resets the machine. Type EXIT at the prompt to quit.
         Standard input may be redirected from a file to run a script.
+        Set PHIDOS_TRACE=1 to see stack traces of internal errors.
         """;
 
     public static int Run(string[] args)
     {
-        var mounts = new List<(char Drive, string Path, bool ReadOnly)>();
-        bool readOnly = false;
-        bool askDate = true;
-        string? newDisk = null;
-        string size = "360K";
-        string? label = null;
-        bool blank = false;
-        char nextDrive = 'A';
-
-        for (int i = 0; i < args.Length; i++)
+        HostOptions o;
+        try
         {
-            string a = args[i];
-            string Next() => i + 1 < args.Length ? args[++i] : throw new ArgumentException($"{a} needs a value.");
-            try
-            {
-                switch (a)
-                {
-                    case "-h" or "--help" or "/?":
-                        Console.WriteLine(Usage);
-                        return 0;
-                    case "-r" or "--readonly": readOnly = true; break;
-                    case "--no-date": askDate = false; break;
-                    case "--new": newDisk = Next(); break;
-                    case "--size": size = Next(); break;
-                    case "--label": label = Next(); break;
-                    case "--blank": blank = true; break;
-                    case "-a" or "-b" or "-c" or "-d":
-                        mounts.Add((char.ToUpperInvariant(a[1]), Next(), readOnly));
-                        break;
-                    default:
-                        if (a.StartsWith('-')) throw new ArgumentException($"Unknown option {a}");
-                        mounts.Add((nextDrive, a, readOnly));
-                        break;
-                }
-                if (mounts.Count > 0) nextDrive = (char)(mounts.Max(m => m.Drive) + 1);
-            }
-            catch (ArgumentException ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-                return 2;
-            }
+            o = CommandLine.Parse(args);
+        }
+        catch (ArgumentException ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+            Console.Error.WriteLine("Try phidos --help.");
+            return 2;
         }
 
-        if (newDisk is not null) return CreateDisk(newDisk, size, label, blank);
+        if (o.ShowHelp)
+        {
+            Console.WriteLine(Usage);
+            return 0;
+        }
+        if (o.DiskToolArgs is not null) return DiskTool.Run(o.DiskToolArgs);
+        if (o.NewDisk is not null) return CreateDisk(o.NewDisk, o.Size, o.Label, o.Blank);
 
         var options = new MachineOptions
         {
             ExitPowersOff = true,
-            PromptForDateTimeAtBoot = askDate,
-            DriveCount = Math.Max(2, mounts.Count == 0 ? 2 : mounts.Max(m => m.Drive) - 'A' + 1),
+            PromptForDateTimeAtBoot = o.AskDate,
+            DriveCount = Math.Max(2, o.Mounts.Count == 0 ? 2 : o.Mounts.Max(m => m.Drive) - 'A' + 1),
         };
 
         using var machine = new DosMachine(options);
         try
         {
-            if (!mounts.Any(m => m.Drive == 'A'))
+            if (!o.Mounts.Any(m => m.Drive == 'A'))
                 machine.MountImage('A', SystemDisk.CreateInMemory(), ownsStream: true);
-            foreach (var (drive, path, ro) in mounts)
-                machine.Mount(drive, path, ro);
+            foreach (var m in o.Mounts) Mount(machine, m);
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)
         {
@@ -99,6 +89,19 @@ internal static class HostApp
         machine.Start();
         Pump(machine);
         return 0;
+    }
+
+    private static void Mount(DosMachine machine, MountSpec m)
+    {
+        if (Directory.Exists(m.Path))
+        {
+            machine.MountFolder(m.Drive, m.Path, m.ReadOnly, m.Capacity ?? 362_496);
+            return;
+        }
+        if (!File.Exists(m.Path)) throw new FileNotFoundException($"{m.Drive}: {m.Path} is neither a disk image nor a folder.");
+        if (m.Capacity is not null)
+            Console.Error.WriteLine($"Note: the capacity option for {m.Drive}: is ignored, a disk image has its own size.");
+        machine.MountImage(m.Drive, m.Path, m.ReadOnly);
     }
 
     private static int CreateDisk(string path, string size, string? label, bool blank)

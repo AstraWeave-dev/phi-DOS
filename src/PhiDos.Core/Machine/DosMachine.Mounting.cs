@@ -38,7 +38,10 @@ public sealed partial class DosMachine
     public void MountImage(char drive, Stream image, bool readOnly = false, bool ownsStream = false)
         => MountDrive(drive, new Fat12Drive(image, readOnly || !image.CanWrite, ownsStream));
 
-    /// <summary>把电脑上的一个文件夹映射为驱动器。</summary>
+    /// <summary>
+    /// 把电脑上的一个文件夹映射为驱动器。<paramref name="capacityBytes"/> 是假装的磁盘容量，
+    /// 默认和 360KB 软盘一样；传 <see cref="FolderDrive.Unlimited"/> 表示不限容量。
+    /// </summary>
     public void MountFolder(char drive, string folderPath, bool readOnly = false, long capacityBytes = 362_496)
         => MountDrive(drive, new FolderDrive(folderPath, readOnly, capacityBytes));
 

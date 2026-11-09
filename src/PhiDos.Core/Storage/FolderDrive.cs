@@ -11,11 +11,18 @@ namespace PhiDos.Core.Storage;
 /// 1. 不符合 8.3 的文件和目录一律隐藏、不可访问。
 /// 2. 查找不区分大小写；DOS 新建的文件和目录用大写名字写入。
 /// 3. 容量是设定值，已用空间按文件实际大小累计（按 1KB 簇向上取整）。
+///    容量设为 <see cref="Unlimited"/> 时不限容量，剩余空间报告电脑那块盘的实际剩余空间（最多 999999999 字节），也不再扫描文件夹。
 /// 4. 永远不会访问到文件夹以外：符号链接一律忽略，每个路径都检查是否仍在根目录之下。
 /// </remarks>
 public sealed class FolderDrive : IDrive
 {
     private const int ClusterBytes = 1024;
+
+    /// <summary>不限容量。</summary>
+    public const long Unlimited = -1;
+
+    /// <summary>不限容量时最多报告 999999999 字节：DIR 里这一列只有 9 位宽，数字再大就对不齐了。</summary>
+    private const long MaxReported = 999_999_999;
     private readonly string _root;
     private readonly long _capacity;
 
@@ -148,9 +155,11 @@ public sealed class FolderDrive : IDrive
         return used;
     }
 
+    public bool IsUnlimited => _capacity == Unlimited;
+
     private void RequireSpace(long extraBytes)
     {
-        if (extraBytes <= 0) return;
+        if (extraBytes <= 0 || IsUnlimited) return;
         if (UsedBytes() + extraBytes > _capacity) throw new DosException(DosError.DiskFull);
     }
 
@@ -158,7 +167,14 @@ public sealed class FolderDrive : IDrive
 
     // ───────── IDrive ─────────
 
-    public DriveSpace GetSpace() => new(_capacity, Math.Max(0, _capacity - UsedBytes()), ClusterBytes);
+    public DriveSpace GetSpace()
+    {
+        if (!IsUnlimited) return new(_capacity, Math.Max(0, _capacity - UsedBytes()), ClusterBytes);
+        long free = MaxReported;
+        try { free = Math.Min(MaxReported, new DriveInfo(_root).AvailableFreeSpace); }
+        catch (Exception ex) when (ex is IOException or ArgumentException or UnauthorizedAccessException) { }
+        return new(MaxReported, free, ClusterBytes);
+    }
 
     public IReadOnlyList<DriveEntry> List(IReadOnlyList<string> directory)
         => Visible(DirPath(directory)).Select(v => ToEntry(v.Name, v.Info)).ToList();

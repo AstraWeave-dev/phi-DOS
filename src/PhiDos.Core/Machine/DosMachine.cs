@@ -36,8 +36,8 @@ public sealed partial class DosMachine : IDisposable
     public DosMachine(MachineOptions? options = null)
     {
         Options = options ?? new MachineOptions();
-        if (Options.DriveCount is < 1 or > 4)
-            throw new ArgumentOutOfRangeException(nameof(options), "DriveCount must be 1 to 4.");
+        if (Options.DriveCount is < 1 or > 26)
+            throw new ArgumentOutOfRangeException(nameof(options), "DriveCount must be 1 to 26.");
         _drives = new DriveSlot[Options.DriveCount];
         for (int i = 0; i < _drives.Length; i++) _drives[i] = new DriveSlot();
     }
