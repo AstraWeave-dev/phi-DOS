@@ -347,7 +347,14 @@ byte[] image = Machine.ExportImage('A');
 
 ## 9. 和剧情联动
 
-磁盘上的 IL 程序只能通过 IDos 和系统打交道，碰不到游戏。要让 DOS 里的操作影响剧情，用**内置程序表**：
+磁盘上的 IL 程序只能通过 IDos 和系统打交道，碰不到游戏。要让 DOS 里的操作影响剧情，有两种方式：
+
+- **内置程序表**：盘上放一个占位文件，玩家运行它时，系统直接调用游戏里的 C# 类。
+- **呼叫宿主**：盘上放一个真正的程序，它自己调用 `dos.CallHost(名字, 参数)` 通知游戏。
+
+### 9.1 内置程序表
+
+用**内置程序表**：
 
 ```csharp
 var options = new MachineOptions
@@ -372,11 +379,72 @@ Machine = new DosMachine(options);
 UnlockCommand.Unlocked += who => GetNode<DialogBox>("Dialog").Show($"{who} 解开了密码。");
 ```
 
-其他联动方式：
+### 9.2 呼叫宿主：盘上的真程序通知游戏
+
+剧情需要"玩家在盘里找到一个程序、运行它，然后游戏切换到另一个场景"时，用这种方式。程序是真的 .COM，可以有自己的界面、问答、动画，最后由它自己决定通知游戏。
+
+**游戏这边**：在 `MachineOptions.HostCalls` 里登记名字和处理函数。
+
+```csharp
+var options = new MachineOptions
+{
+    HostCalls = new Dictionary<string, Func<string, string?>>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["SCENE"] = path =>
+        {
+            Callable.From(() => GetTree().ChangeSceneToFile(path)).CallDeferred();
+            return "ok";
+        },
+    },
+};
+```
+
+**盘上的程序**：
+
+```csharp
+using PhiDos.Abi;
+
+public class Portal : IPhiProgram
+{
+    public int Run(IDos dos, string[] args)
+    {
+        dos.WriteLine("Opening the portal...");
+        string answer = dos.CallHost("SCENE", "res://scenes/chapter2.tscn");
+        return answer == "ok" ? 0 : 1;
+    }
+}
+```
+
+编译成 `PORTAL.COM` 放进盘里，玩家运行它，游戏就会切换到 chapter2 场景。
+
+`docs/godot/StoryTerminal.cs` 是完整的例子：它继承 DosTerminal，登记了 `SCENE`（切换场景，只允许 `res://scenes/` 下的场景）和 `SAY`（把一句话交给游戏）两项功能。
+
+规则：
+
+- 处理函数的参数是程序传来的字符串，返回值交还给程序；返回 null 时程序拿到空字符串。名字不区分大小写。
+- **处理函数在虚拟机线程上执行。** 碰 Godot 节点（切换场景、显示对话、播放动画）必须用 `Callable.From(...).CallDeferred()` 回到主线程。
+- **处理函数应当尽快返回。** 它执行期间程序在等它，屏幕不会有任何变化。常见写法就是上面那样：用 CallDeferred 把主线程上的事安排好，马上返回，程序接着运行到结束，主线程在下一帧做真正的工作。
+- **程序只能叫出你登记过的名字。** 这不是让程序任意调用 Godot：加载检查照常拦截危险的 API，盘上的程序仍然引用不到 Godot 或游戏的程序集。处理函数里要检查参数，比如只允许切换到特定目录下的场景。
+- 程序叫了没登记的名字时，会收到 `DosException`（`DosError.InvalidFunction`）；程序不捕获的话，屏幕上显示 `Abnormal program termination`。
+- 处理函数抛出 `DosException` 时原样交给程序；抛出其他异常时，程序收到 `DosError.HostError`，消息里带着原异常的消息，虚拟机本身不受影响。
+- 处理函数执行期间虚拟机被重启或关机时，处理函数返回后程序不会再继续。
+
+**和内置程序表的区别：**
+
+| | 内置程序表 | 呼叫宿主 |
+|---|---|---|
+| 盘上的文件 | 占位文件，内容不被使用 | 真正的 .COM 程序 |
+| 代码写在哪 | 游戏项目里 | 盘上的程序里，游戏只登记处理函数 |
+| 能不能调试 | 可以在游戏里直接打断点 | 程序的部分要按 WRITING-PROGRAMS.md 第 12 节的方法调试 |
+| 能访问什么 | 游戏的一切 | 只能通过 IDos，和游戏的联系只有登记过的那几个名字 |
+| 适合 | 剧情命令、谜题判定 | 玩家"找到并运行"的程序，程序本身就是剧情的一部分 |
+
+### 9.3 其他联动方式
 
 | 想做的事 | 做法 |
 |---|---|
-| 玩家运行某个命令时触发剧情 | 内置程序表（上面的方法） |
+| 玩家运行某个命令时触发剧情 | 内置程序表（9.1） |
+| 盘上的真程序通知游戏，比如切换场景 | 呼叫宿主（9.2）：登记 `HostCalls`，程序调用 `dos.CallHost` |
 | 剧情推进时给玩家一个新文件 | `WithDrive` 往盘里写文件 |
 | 检查玩家有没有写出某个文件 | `WithDrive` 读盘 |
 | 玩家需要"插入另一张盘" | `Unmount` / `MountImage`，配合 Not ready error |
@@ -475,7 +543,7 @@ public class Hello : IPhiProgram
 | 句柄 | `Duplicate`、`ForceDuplicate`（0 标准输入、1 标准输出、2 标准错误） |
 | 目录 | `CurrentDrive`、`CurrentDirectory`、`ChangeDirectory`、`MakeDirectory`、`RemoveDirectory` |
 | 磁盘 | `GetDiskInfo`、`FormatDisk` |
-| 进程 | `Exec`（运行另一个程序）、`CommandTail`、`GetEnv`、`Now` |
+| 进程 | `Exec`（运行另一个程序）、`CommandTail`、`GetEnv`、`CallHost`（呼叫宿主，见 9.2）、`Now` |
 
 出错时抛出 `DosException`，`Error` 属性是 DOS 的错误码，例如 `DosError.FileNotFound`。
 
@@ -544,7 +612,7 @@ public class Hello : IPhiProgram
 | 类型 | 说明 |
 |---|---|
 | `DosMachine` | 虚拟电脑。`Mount`、`MountImage`、`MountFolder`、`MountDrive`、`Unmount`、`IsMounted`、`Start`、`Reset`、`Stop`、`WaitForExit`、`WithDrive`、`ExportImage`、`Console`、`State`、`StateChanged` |
-| `MachineOptions` | `DriveCount`、`PromptForDateTimeAtBoot`、`ExitPowersOff`、`Clock`、`BuiltinPrograms`、`InjectInterruptChecks`、`VerifyPrograms`、`EnvironmentSize`、`ThreadStackSize` |
+| `MachineOptions` | `DriveCount`、`PromptForDateTimeAtBoot`、`ExitPowersOff`、`DefaultPrompt`、`Clock`、`BuiltinPrograms`、`HostCalls`、`InjectInterruptChecks`、`VerifyPrograms`、`EnvironmentSize`、`ThreadStackSize` |
 | `IConsoleDevice` | `PushKey`、`PushText`、`EndOfInput`、`TakeOutput`、`Screen`、`IsWaitingForInput`、`WaitForInputIdle`、`OutputWritten` |
 | `TextScreen` | `Columns`、`Rows`、`Snapshot`、`GetCell`、`GetLine`、`GetLines`、`Version`、`CursorX`、`CursorY`、`Bell` |
 | `ScreenCell` | `Rune`、`Attribute`、`IsWideTail` |

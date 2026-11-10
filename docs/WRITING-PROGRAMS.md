@@ -13,7 +13,7 @@
 7. 颜色与全屏界面
 8. 文件与目录
 9. 标准输入输出、重定向和管道
-10. 运行其他程序、环境变量、磁盘信息
+10. 运行其他程序、呼叫宿主、环境变量、磁盘信息
 11. 规则与限制
 12. 调试
 13. 把程序放到盘上
@@ -361,6 +361,8 @@ catch (DosException e) when (e.Error == DosError.FileNotFound)
 | InvalidDrive | 没有这个驱动器 |
 | DiskFull | 磁盘满了 |
 | WriteProtected / DriveNotReady | 写保护 / 没插盘，用户在提示里选了 Ignore |
+| InvalidFunction | CallHost 叫了宿主没登记的名字 |
+| HostError | 宿主处理 CallHost 时出错 |
 
 写保护和没插盘时，屏幕会先出现 `Abort, Retry, Ignore?`。用户选 Abort 时程序直接结束；选 Retry 会重试；选 Ignore 时你的程序才会收到 `DosException`。
 
@@ -416,7 +418,7 @@ dos.Duplicate(2);              // 复制标准错误（屏幕和键盘）；新�
 // 现在 dos.ReadKey 读的是键盘，dos.Read(data, ...) 读的是管道里的数据
 ```
 
-## 10. 运行其他程序、环境变量、磁盘信息
+## 10. 运行其他程序、呼叫宿主、环境变量、磁盘信息
 
 ### 运行其他程序
 
@@ -428,6 +430,34 @@ int code = dos.Exec("SORT", "/R");
 - 不能用它运行 .BAT。
 - 子程序继承你的全部句柄，所以你的重定向也会传给它。
 - 返回子程序的退出码。找不到时抛出 `DosException(FileNotFound)`。
+
+### 呼叫宿主
+
+phi-DOS 嵌在游戏或别的应用里时，宿主可以登记几项功能给程序调用，程序用名字呼叫它们：
+
+```csharp
+string answer = dos.CallHost("SCENE", "res://scenes/chapter2.tscn");
+```
+
+- 第一个参数是功能的名字，不区分大小写；第二个参数是传给宿主的字符串，可以省略。
+- 返回宿主给出的回答，没有回答时是空字符串。
+- 有哪些名字、参数怎么写、回答是什么，完全由宿主决定。请找宿主的作者要这份清单。
+- 宿主没有登记这个名字时抛出 `DosException`，`Error` 是 `DosError.InvalidFunction`。同一个程序可能在不同的宿主里运行（比如终端版什么都没登记），需要时可以捕获它，给出友好的提示。
+- 宿主处理出错时抛出 `DosException`，`Error` 是 `DosError.HostError`，消息里带着宿主那边的原因。宿主也可能直接给出别的错误码。
+- 宿主处理期间程序在等待，一般很快就会返回。
+
+```csharp
+try
+{
+    dos.CallHost("SCENE", "res://scenes/chapter2.tscn");
+}
+catch (DosException e) when (e.Error == DosError.InvalidFunction)
+{
+    dos.WriteLine("Nothing happens.");
+}
+```
+
+宿主那边怎么登记，见 GODOT-INTEGRATION.md 第 9.2 节。
 
 ### 环境变量
 

@@ -60,6 +60,7 @@ machine.Stop();                       // 关机
 ~~~
 
 - 宿主与机器之间通过 IConsoleDevice 交换输出和按键（Core 内定义）。图形宿主绘制 TextScreen（80×25 字符格，支持宽字符和 CGA 颜色属性）。
+- 宿主功能表：MachineOptions.HostCalls，供程序通过 IDos.CallHost 呼叫，见"核心接口"一节。
 - 游戏代码访问磁盘内容：WithDrive（和虚拟机线程互斥地读写驱动器）、ExportImage（导出虚拟磁盘的当前内容，用于存档）。终端宿主和 Godot 宿主各自实现屏幕绘制，Core 不感知宿主类型。
 - 开机信息：
 
@@ -136,6 +137,7 @@ public interface IDos
     int Exec(string program, string args);
     string CommandTail { get; }         // 命令行参数原文
     string? GetEnv(string name);
+    string CallHost(string name, string argument = "");   // 呼叫宿主登记过的功能
     DateTime Now { get; }
 }
 
@@ -155,6 +157,15 @@ public interface IPhiProgram
 | FormatDisk | 无 | FORMAT 命令 |
 | Duplicate / ForceDuplicate | INT 21h 45h / 46h | MORE 从管道读数据、从键盘读按键 |
 | CommandTail | PSP 80h 处的命令尾 | FIND 要解析带空格的 "字符串" |
+| CallHost | 软中断：程序请系统办一件事 | 盘上的真程序通知游戏（例如切换场景），见下面"呼叫宿主" |
+
+### 呼叫宿主（CallHost）
+- 宿主在 MachineOptions.HostCalls 里登记"名字 → 处理函数"，函数签名是 `Func<string, string?>`：参数是程序传来的字符串，返回值交还给程序，null 当作空字符串。名字不区分大小写（宿主给的字典即使区分大小写也一样）。
+- 程序调用 `dos.CallHost(名字, 参数)`。处理函数在虚拟机线程上同步执行，调用前照常检查 Ctrl+C 和重启；处理函数返回时机器已被重启或关机的话，不再回到程序里。
+- 名字为空或没有登记：抛 DosException（InvalidFunction）。
+- 处理函数抛出 DosException：原样交给程序（宿主可以借此给出具体的 DOS 错误码）。抛出其他异常：转成 DosException（HostError，0x107），消息是 "Host function failed: " 加原异常的消息，不会弄垮虚拟机线程。
+- 虚拟机自己用来打断程序的异常（重启、Ctrl+C、严重错误里选 Abort）原样放行。
+- 和内置程序表的区别：内置程序表是"盘上的占位文件 → 游戏里的 C# 类"，文件内容不被使用；CallHost 是盘上的真程序自己决定什么时候、用什么参数呼叫宿主。程序只能叫出宿主登记过的名字，加载检查和隔离不受影响。
 
 句柄 0、1、2 分别是标准输入、标准输出、标准错误，3、4 是 AUX 和 PRN（都接到 NUL）。每个进程最多 20 个句柄，子程序继承父程序的全部句柄。
 

@@ -36,6 +36,19 @@ public sealed class MachineOptions
     public IReadOnlyDictionary<string, Func<IPhiProgram>> BuiltinPrograms { get; init; }
         = new Dictionary<string, Func<IPhiProgram>>(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// 宿主功能表：程序用 IDos.CallHost(名字, 参数) 呼叫时，调用这里登记的函数。
+    /// 函数的参数是程序传来的字符串，返回值交还给程序，返回 null 当作空字符串。
+    /// 名字不区分大小写。函数在虚拟机线程上执行，碰 Godot 节点要用 CallDeferred 回到主线程。
+    /// </summary>
+    /// <remarks>
+    /// 和 <see cref="BuiltinPrograms"/> 的区别：那里是"盘上的占位文件 → 游戏里的 C# 类"，
+    /// 这里是盘上的真程序自己决定什么时候、用什么参数呼叫宿主。
+    /// 函数抛出的 DosException 原样交给程序；其他异常转成 DosError.HostError。
+    /// </remarks>
+    public IReadOnlyDictionary<string, Func<string, string?>> HostCalls { get; init; }
+        = new Dictionary<string, Func<string, string?>>(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>加载程序时是否插入 Ctrl+C / 重启检查点。关掉后死循环只能靠重启解决，而且线程会一直占 CPU。</summary>
     public bool InjectInterruptChecks { get; init; } = true;
 

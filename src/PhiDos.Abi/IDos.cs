@@ -121,6 +121,18 @@ public interface IDos
     /// <summary>读取环境变量，不存在时返回 null。名字不区分大小写。</summary>
     string? GetEnv(string name);
 
+    /// <summary>
+    /// 呼叫宿主（运行 phi-DOS 的游戏或应用）登记过的一项功能。
+    /// name 不区分大小写。返回宿主给出的回答，没有回答时是空字符串。
+    /// 宿主没有登记这个名字时抛出 DosException（InvalidFunction）；
+    /// 宿主的处理函数出错时抛出 DosException（HostError）。
+    /// </summary>
+    /// <remarks>
+    /// 相当于老式 DOS 程序发软中断请系统办事。程序只能叫出宿主事先登记的名字，
+    /// 宿主怎么处理、回答什么完全由宿主决定。
+    /// </remarks>
+    string CallHost(string name, string argument = "");
+
     /// <summary>系统时钟（可被 DATE、TIME 命令调整，不影响宿主电脑的时间）。</summary>
     DateTime Now { get; }
 }
