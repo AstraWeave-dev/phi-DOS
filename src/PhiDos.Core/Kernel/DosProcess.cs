@@ -155,4 +155,5 @@ internal sealed class DosProcess : IDos
     public int Exec(string program, string args) => _kernel.Exec(this, program, args);
     public string? GetEnv(string name) { _kernel.EnterCall(); return Environment.Get(name); }
     public DateTime Now { get { _kernel.EnterCall(); return _kernel.Now; } }
+    public string CallHost(string name, string argument = "") => _kernel.CallHost(name, argument);
 }

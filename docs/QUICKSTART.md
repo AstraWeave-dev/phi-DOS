@@ -70,6 +70,7 @@ machine.Dispose();
 | 重启 | `machine.Reset()` |
 | 关机 | `machine.Stop()` |
 | 命令触发剧情 | `BuiltinPrograms = new Dictionary<string, Func<IPhiProgram>> { ["UNLOCK"] = () => new UnlockCommand() }`，盘上放 `UNLOCK.COM` |
+| 盘上的真程序通知游戏 | `HostCalls = new Dictionary<string, Func<string, string?>> { ["SCENE"] = path => ... }`，程序里 `dos.CallHost("SCENE", path)` |
 | 回到 Godot 主线程 | `Callable.From(() => ...).CallDeferred()` |
 | 游戏时间当 DOS 时钟 | `Clock = () => gameTime` |
 | 开机不问日期 | `PromptForDateTimeAtBoot = false` |

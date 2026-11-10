@@ -51,11 +51,16 @@ public partial class DosTerminal : Control
         CustomMinimumSize = new Vector2(_cell.X * TextScreen.Columns, _cell.Y * TextScreen.Rows);
         FocusMode = FocusModeEnum.All;
 
-        Machine = new DosMachine(new MachineOptions { PromptForDateTimeAtBoot = PromptForDateTime });
+        Machine = new DosMachine(CreateOptions());
         Machine.MountImage('A', LoadDisk(DiskPath), ownsStream: true);
         Machine.Start();
         GrabFocus();
     }
+
+    /// <summary>
+    /// 虚拟机的配置。子类可以重写它，比如登记宿主功能（见 StoryTerminal.cs）。
+    /// </summary>
+    protected virtual MachineOptions CreateOptions() => new() { PromptForDateTimeAtBoot = PromptForDateTime };
 
     public override void _ExitTree()
     {

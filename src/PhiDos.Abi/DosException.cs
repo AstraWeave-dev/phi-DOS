@@ -26,6 +26,7 @@ public enum DosError
     DirectoryNotEmpty = 0x104,
     BadProgram = 0x105,
     NotSupported = 0x106,
+    HostError = 0x107,
 }
 
 /// <summary>系统调用失败时抛出的异常。</summary>
@@ -61,6 +62,7 @@ public class DosException : Exception
         DosError.DirectoryNotEmpty => "Directory not empty",
         DosError.BadProgram => "Error in EXE file",
         DosError.NotSupported => "Not supported",
+        DosError.HostError => "Host function failed",
         _ => $"DOS error {(int)error}",
     };
 }
