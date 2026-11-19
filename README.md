@@ -39,7 +39,7 @@ A:\>
 
 ## 下载
 
-到 [Releases](https://github.com/AstroCanvas-dev/phi-DOS/releases) 下载对应平台的 zip，解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`）。
+到 [Releases](https://github.com/AstraWeave-dev/phi-DOS/releases) 下载对应平台的 zip，解压后双击 `run-phidos.bat`（Linux 上运行 `run-phidos.sh`）。
 
 ## 构建和运行
 

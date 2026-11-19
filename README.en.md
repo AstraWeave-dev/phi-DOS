@@ -44,7 +44,7 @@ A:\>
 
 ## Download
 
-Get the zip for your platform from [Releases](https://github.com/AstroCanvas-dev/phi-DOS/releases), unpack it and double-click `run-phidos.bat` (on Linux run `run-phidos.sh`). The `A` folder next to it becomes drive A:.
+Get the zip for your platform from [Releases](https://github.com/AstraWeave-dev/phi-DOS/releases), unpack it and double-click `run-phidos.bat` (on Linux run `run-phidos.sh`). The `A` folder next to it becomes drive A:.
 
 The packages are about 1 MB and need the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Packages ending in `-with-dotnet`, when a release has them, include the runtime.
 
